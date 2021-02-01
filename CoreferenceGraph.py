@@ -1,6 +1,16 @@
 def indexer(docNumber, sentenceIndex):
 	return 'd'+str(docNumber) + 's'+str(sentenceIndex)
 
+def getRadixNode(node):
+	docNumber = node[1]
+	return indexer(docNumber, 0)
+
+def shareEntities(list1, list2):
+	for e1 in list1:
+		if e1 in list2:
+			return True
+	return False
+
 from pynlp import StanfordCoreNLP
 from nltk import tokenize
 import nltk
@@ -32,7 +42,8 @@ documents = [
 graph = gs.Graph()
 
 id2sentence = {}
-nodes2radix = {}
+id2entities = {}
+#nodes2radix = {}
 
 
 for docNumber, text in enumerate(documents, start=0):
@@ -127,13 +138,19 @@ for docNumber, text in enumerate(documents, start=0):
 	print('\n\n********* Ending document ', docNumber, ' *********\n\n')
 
 	
-	'''
+	
 	print("\n--- Named entity recognition sentence level: ---\n")
 	for i, sentence in enumerate(document, start=0):
 		#first_sentence = document[0]
 		print('\n ',i,') ')
+		id2entities[indexer(docNumber, i)] = sentence.entities
 		for entity in sentence.entities:
 		    print(entity, '({})'.format(entity.type))
-	'''
+	
 
+for i in id2sentence.getkeys():
+	for j in id2sentence.getkeys():
+		if i != j:
+			if shareEntities(id2entities[i], id2entities[j]):
+				graph.addEdge(i, getRadixNode(j))
 
