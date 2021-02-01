@@ -32,6 +32,7 @@ documents = [
 graph = gs.Graph()
 
 id2sentence = {}
+nodes2radix = {}
 
 
 for docNumber, text in enumerate(documents, start=0):
@@ -50,7 +51,7 @@ for docNumber, text in enumerate(documents, start=0):
 	    #print("\n---------------------\n")
 	    #help(sentence)
 	'''
-
+	
 
 	print("\n--- SENTENCE SPLITTING and AddToGraph: ---\n")
 	for sentenceIndex, sentence in enumerate(tokenize.sent_tokenize(text), start=0):
@@ -114,9 +115,18 @@ for docNumber, text in enumerate(documents, start=0):
 	print('Nodes: ', graph.getNodes())
 	print('Edges: ', graph.getEdges())
 
+	radix_nodes = graph.getNodes()
+
+	for (node1, node2) in graph.getEdges():
+		if node2 in radix_nodes:
+			radix_nodes.remove(node2)
+
+	print(radix_nodes)
+
 
 	print('\n\n********* Ending document ', docNumber, ' *********\n\n')
 
+	
 	'''
 	print("\n--- Named entity recognition sentence level: ---\n")
 	for i, sentence in enumerate(document, start=0):
