@@ -143,14 +143,22 @@ for docNumber, text in enumerate(documents, start=0):
 	for i, sentence in enumerate(document, start=0):
 		#first_sentence = document[0]
 		print('\n ',i,') ')
-		id2entities[indexer(docNumber, i)] = sentence.entities
+		#id2entities[indexer(docNumber, i)] = str(sentence.entities)
+		id2entities[indexer(docNumber, i)] = list()
 		for entity in sentence.entities:
+			id2entities[indexer(docNumber, i)].append(str(entity))
 		    print(entity, '({})'.format(entity.type))
 	
-
-for i in id2sentence.getkeys():
-	for j in id2sentence.getkeys():
+	
+for i in id2sentence.keys():
+	for j in id2sentence.keys():
 		if i != j:
 			if shareEntities(id2entities[i], id2entities[j]):
-				graph.addEdge(i, getRadixNode(j))
+				graph.addEdge((i, getRadixNode(j)))
 
+
+print("\n--- Id 2 entities: ---\n")
+print(id2entities)
+
+print("\n--- Graph: ---\n")
+print(graph)
