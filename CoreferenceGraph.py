@@ -2,7 +2,9 @@ def indexer(docNumber, sentenceIndex):
 	return 'd'+str(docNumber) + 's'+str(sentenceIndex)
 
 def getRadixNode(node):
-	docNumber = node[1]
+	dPos = node.index('s')
+	docNumber = node[1:dPos]
+	print(indexer(docNumber, 0))
 	return indexer(docNumber, 0)
 
 def shareEntities(list1, list2):
@@ -113,9 +115,9 @@ for docNumber, text in enumerate(documents, start=0):
 		for index, i in enumerate(listElem, start=0):
 			if index == 0:
 				listElemPopped = listElem.copy()
-			print('\nPrima di pop',i,': ', listElemPopped)
+			#print('\nPrima di pop',i,': ', listElemPopped)
 			listElemPopped.pop(0)
-			print('\nDopo pop',i,': ', listElemPopped)
+			#print('\nDopo pop',i,': ', listElemPopped)
 			for j in listElemPopped:
 				graph.addEdge((indexer(docNumber, i), indexer(docNumber, j)))
 				print('\nEdges: ', graph.getEdges())
@@ -132,12 +134,9 @@ for docNumber, text in enumerate(documents, start=0):
 		if node2 in radix_nodes:
 			radix_nodes.remove(node2)
 
+	print("\n--- Radix nodes: ---\n")
 	print(radix_nodes)
 
-
-	print('\n\n********* Ending document ', docNumber, ' *********\n\n')
-
-	
 	
 	print("\n--- Named entity recognition sentence level: ---\n")
 	for i, sentence in enumerate(document, start=0):
@@ -147,9 +146,12 @@ for docNumber, text in enumerate(documents, start=0):
 		id2entities[indexer(docNumber, i)] = list()
 		for entity in sentence.entities:
 			id2entities[indexer(docNumber, i)].append(str(entity))
-		    print(entity, '({})'.format(entity.type))
+			print(entity, '({})'.format(entity.type))
+
+
+	print('\n\n********* Ending document ', docNumber, ' *********\n\n')
 	
-	
+
 for i in id2sentence.keys():
 	for j in id2sentence.keys():
 		if i != j:
@@ -161,4 +163,4 @@ print("\n--- Id 2 entities: ---\n")
 print(id2entities)
 
 print("\n--- Graph: ---\n")
-print(graph)
+print(graph.getEdges())
