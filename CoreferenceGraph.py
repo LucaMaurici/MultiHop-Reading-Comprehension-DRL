@@ -1,3 +1,5 @@
+#class CoreferenceGraph:
+
 def indexer(docNumber, sentenceIndex):
 	return 'd'+str(docNumber) + 's'+str(sentenceIndex)
 
@@ -18,6 +20,7 @@ from nltk import tokenize
 import nltk
 nltk.download('punkt')
 import Graph_class as gs
+import random
 
 annotators = 'tokenize, ssplit, pos, lemma, ner, entitymentions, coref, sentiment, openie'
 options = {'openie.resolve_coref': True}
@@ -164,3 +167,22 @@ print(id2entities)
 
 print("\n--- Graph: ---\n")
 print(graph.getEdges())
+
+print("\n--- Adjacent nodes do the first one: ---\n")
+graph.setCurrentNode('d0s0')
+print(graph.currentNode)
+print(graph.getAdjacentNodes())
+
+print("\n--- Random walk: ---\n")
+for i in range(0,500):
+	print("I: ",i)
+	adjacentNodes = graph.getAdjacentNodes()
+	print(adjacentNodes)
+	adjacentNodesLength = len(adjacentNodes)
+	if adjacentNodesLength != 0:
+		randomIndex = random.randint(0, adjacentNodesLength-1)
+	else:
+		break
+	print(randomIndex)
+	graph.goTo(adjacentNodes[randomIndex])
+	print(graph.currentNode)
