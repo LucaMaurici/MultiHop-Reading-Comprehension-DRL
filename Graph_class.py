@@ -1,5 +1,7 @@
 class Graph:
 
+    currentNode = None
+
     def __init__(self, node2Edges=None):
         if node2Edges is None:
             node2Edges = {}
@@ -31,5 +33,18 @@ class Graph:
         (node1, node2) = tuple(edge)
         if node1 in self.node2Edges:
             self.node2Edges[node1].append(node2)
+            self.node2Edges[node1] = list(set(self.node2Edges[node1]))  # remove duplicates
         else:
             self.node2Edges[node1] = [node2]
+
+    
+    def setCurrentNode(self, node):
+        self.currentNode = node
+
+    def getAdjacentNodes(self):
+        #if currentNode != None:
+        return self.node2Edges[self.currentNode]
+        #return []
+
+    def goTo(self, node):
+        self.currentNode = node
