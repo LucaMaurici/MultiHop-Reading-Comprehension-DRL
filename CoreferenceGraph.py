@@ -172,8 +172,11 @@ def buildCoreferenceGraph():
 	file = open("CoreferenceGraph.pkl", "wb")
 	pickle.dump(graph, file)
 	file.close()
+	file = open("id2sentence.pkl", "wb")
+	pickle.dump(graph, file)
+	file.close()
 
-	return graph
+	return graph, id2sentence
 
 	
 

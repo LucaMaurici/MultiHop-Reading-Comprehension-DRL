@@ -7,8 +7,10 @@ readFromFile = True
 if readFromFile:
 	file = open("CoreferenceGraph.pkl", "rb")
 	graph = pickle.load(file)
+	file = open("id2sentence.pkl", "rb")
+	id2sentence = pickle.load(file)
 else:
-	graph = cg.buildCoreferenceGraph()
+	graph, id2sentence = cg.buildCoreferenceGraph()
 
 print("\n--- Graph: ---\n")
 print(graph.getEdges())
