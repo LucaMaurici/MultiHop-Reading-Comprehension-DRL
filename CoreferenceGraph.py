@@ -173,7 +173,7 @@ def buildCoreferenceGraph():
 	pickle.dump(graph, file)
 	file.close()
 	file = open("id2sentence.pkl", "wb")
-	pickle.dump(graph, file)
+	pickle.dump(id2sentence, file)
 	file.close()
 
 	return graph, id2sentence

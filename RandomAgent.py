@@ -21,6 +21,8 @@ print(graph.currentNode)
 print(graph.getAdjacentNodes())
 
 print("\n--- Random walk: ---\n")
+walkIDs = [graph.currentNode]
+walkSentences = [id2sentence[graph.currentNode]]
 for i in range(0,500):
 	print("I: ",i)
 	adjacentNodes = graph.getAdjacentNodes()
@@ -32,6 +34,10 @@ for i in range(0,500):
 		break
 	print(randomIndex)
 	graph.goTo(adjacentNodes[randomIndex])
+	walkIDs.append(graph.currentNode)
+	walkSentences.append(id2sentence[graph.currentNode])
 	print(graph.currentNode)
 
-#print("\n--- Policy walk: ---\n")
+print("\n--- Result: ---\n")
+for sID, sentence in zip(walkIDs, walkSentences):
+	print(sID, ': ', sentence)

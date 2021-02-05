@@ -81,17 +81,16 @@ class ActorNetwork(nn.Module):
 
 
 class CriticNetwork(nn.Module):
-    def __init__(self, input_dims, alpha, fc1_dims=256, fc2_dims=256,
-            checkpoint_dir='tmp/ppo'):
+    def __init__(self, input_dims, alpha, checkpoint_dir='tmp/ppo'):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo')
         self.critic = nn.Sequential(
-                nn.Linear(*input_dims, fc1_dims),
+                nn.Linear(*input_dims, 256),
                 nn.ReLU(),
-                nn.Linear(fc1_dims, fc2_dims),
+                nn.Linear(256, 128),
                 nn.ReLU(),
-                nn.Linear(fc2_dims, 1)
+                nn.Linear(128, 1)
         )
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
