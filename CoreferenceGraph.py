@@ -74,6 +74,7 @@ def buildCoreferenceGraph(question, documents):
     ]
     '''
 
+    '''
     question = 'publication_date blueprint '
     documents = [
         "McKinley Morganfield (April 4, 1913  April 30, 1983), better known as Muddy Waters, was an American blues musician who is often cited as the \"father of modern Chicago blues\".",
@@ -84,6 +85,7 @@ def buildCoreferenceGraph(question, documents):
         "County Donegal (pronounced or ) is a county of Ireland. It is part of the Border Region of the Republic of Ireland and is in the province of Ulster. It is named after the town of Donegal in the south of the county. Donegal County Council is the local council for the county and Lifford serves as the county town. The population of the county is 158,755 according to the 2016 census. It has also been known as (County) Tyrconnell (\"\"), after the historic territory of the same name.",
         "A power trio is a rock and roll band format having a lineup of guitar, bass and drums, leaving out the second guitar or keyboard that are used in other rock music quartets and quintets to fill out the sound with chords. While one or more band members typically sing, power trios emphasize instrumental performance and overall impact over vocals and lyrics.\nHistory.\nThe rise of the power trio in the 1960s was made possible in part by developments in amplifier technology that greatly enhanced the volume of the electric guitar and bass. Particularly, the popularization of the electric bass guitar defined the bottom end and filled in the gaps. Since the amplified bass could also now be louder, the rest of the band could also play at higher volumes, without fear of being unable to hear the bass. This allowed a three-person band to have the same sonic impact as a large band but left far more room for improvisation and creativity, unencumbered by the need for detailed arrangements. As with the organ trio, a 1960s-era soul jazz group centered on the amplified Hammond organ, a three-piece group could fill a large bar or club with a big sound for a much lower price than a large rock and roll band. A power trio, at least in its blues rock incarnation, is also generally held to have developed out of Chicago-style blues bands such as Muddy Waters' trio."
     ]
+    '''
 
     temp = list()
     for document in documents:
