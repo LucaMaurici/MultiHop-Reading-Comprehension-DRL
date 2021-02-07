@@ -24,9 +24,9 @@ def shareWords(sentence1, sentence2):
 def buildCoreferenceGraph(question, documents):
 
     from pynlp import StanfordCoreNLP
-    from nltk import tokenize
-    import nltk
-    nltk.download('punkt')
+    #from nltk import tokenize
+    #import nltk
+    #nltk.download('punkt')
     import Graph_class as gs
     import pickle
 
@@ -148,6 +148,7 @@ def buildCoreferenceGraph(question, documents):
     #nodes2radix = {}
 
     graph.addNode('q')
+    id2sentence['q'] = question
 
 
     for docNumber, text in enumerate(documents, start=0):
@@ -158,16 +159,31 @@ def buildCoreferenceGraph(question, documents):
         document = nlp(text)
         #print(document) # prints 'text'
 
+        
+        print("\n--- SENTENCE SPLITTING and AddToGraph: ---\n")
+        for sentenceIndex, sentence in enumerate(document, start = 0):
+            id2sentence[indexer(docNumber, sentenceIndex)] = str(sentence)
+            graph.addNode(indexer(docNumber, sentenceIndex))
+            if sentenceIndex != 0:
+                graph.addEdge((indexer(docNumber, sentenceIndex-1), indexer(docNumber, sentenceIndex)))
+
         '''
-        print("\n--- SENTENCE SPLITTING: ---\n")
-        for index, sentence in enumerate(document):
-            print(index, sentence, sep=' )')
-            id2sentence[indexer(docNumber, index)] = sentence
-            #print("\n---------------------\n")
-            #help(sentence)
+        import stanfordnlp
+
+        nlpU = stanfordnlp.Pipeline(processors='tokenize', lang='en')
+        documentU = nlpU(text)
+        frasi = list()
+        for i, sentence in enumerate(documentU.sentences):
+            print(f"====== Sentence {i+1} tokens =======")
+            #print(*[f"index: {token.index.rjust(3)}    token: {token.text}" for token in sentence.tokens], sep='\n')
+            for token in sentence.tokens:
+                print(token.text)
+            frasi.append(sentence)
+        print("\n--- Frasi: ---\n")
+        print(frasi)
         '''
         
-
+        '''
         print("\n--- SENTENCE SPLITTING and AddToGraph: ---\n")
         for sentenceIndex, sentence in enumerate(tokenize.sent_tokenize(text), start=0):
             #print("\n---------------------\n")
@@ -177,7 +193,7 @@ def buildCoreferenceGraph(question, documents):
             graph.addNode(indexer(docNumber, sentenceIndex))
             if sentenceIndex != 0:
                 graph.addEdge((indexer(docNumber, sentenceIndex-1), indexer(docNumber, sentenceIndex)))
-
+        '''
 
         print("\n--- id2sentence: ---\n")
         print(id2sentence)
@@ -259,19 +275,21 @@ def buildCoreferenceGraph(question, documents):
     for entity in questionNLP.entities:
         questionEntities.append(str(entity))
     questionLinked = False
+    sentenceIDs = list(id2sentence.keys())
+    sentenceIDs.remove('q')
     if(questionEntities != []):
-        for j in id2sentence.keys():
+        for j in sentenceIDs:
             if shareEntities(questionEntities, id2entities[j]):
                 graph.addEdge(('q', getRadixNode(j)))
                 questionLinked = True
     if not questionLinked:
-        for j in id2sentence.keys():
+        for j in sentenceIDs:
             if shareWords(question, id2sentence[j]):
                 graph.addEdge(('q', getRadixNode(j)))
 
     # ENITTY LINKING between SENTENCES
-    for i in id2sentence.keys():
-        for j in id2sentence.keys():
+    for i in sentenceIDs:
+        for j in sentenceIDs:
             if i != j:
                 if shareEntities(id2entities[i], id2entities[j]):
                     graph.addEdge((i, getRadixNode(j)))
