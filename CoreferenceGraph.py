@@ -103,6 +103,7 @@ def buildCoreferenceGraph(question, documents):
     ]
     '''
 
+    '''
     question = 'residence ali abdullah ahmed'
     documents = [
         "Hispaniola (Spanish: \"La Espa\u00f1ola\"; Latin: \"Hispaniola\"; Ta\u00edno: \"Haiti\") is the 22nd-largest island in the world, located in the Caribbean island group, the Greater Antilles. It is the second largest island in the Caribbean after Cuba, and the tenth most populous island in the world.",
@@ -132,6 +133,7 @@ def buildCoreferenceGraph(question, documents):
         "Jamaica is an island country situated in the Caribbean Sea, consisting of the third-largest island of the Greater Antilles. The island, in area, lies about south of Cuba, and west of Hispaniola (the island containing the nation-states of Haiti and the Dominican Republic). Jamaica is the fourth-largest island country in the Caribbean, by area.",
         "Western Asia, West Asia, Southwestern Asia or Southwest Asia is the westernmost subregion of Asia. The concept is in limited use, as it significantly overlaps with the Middle East (or Near East), the main difference being the exclusion of Egypt (which would be counted as part of North Africa). The term is sometimes used for the purposes of grouping countries in statistics."
     ]
+    '''
 
     temp = list()
     for document in documents:
