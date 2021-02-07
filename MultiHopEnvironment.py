@@ -25,25 +25,31 @@ class MultiHopEnvironment:
         
         self.actions = self.graph.getAdjacentNodes()
         self.state.append(list())
-        for actionID in actions:
-            self.state[1].append(id2sentence[actionID])
+        for actionID in self.actions:
+            self.state[1].append(self.id2sentence[actionID])
 
         self.state.append(list())
         #self.done = False
 
-        return state
+        return self.state
 
     def step(self, actionIndex):
         reward = 0
         done = False
 
-        if actionIndex < len(actions):
+        if actionIndex < len(self.actions):
             self.graph.goTo(self.actions[actionIndex])
         else:
             reward = -0.1
 
-        if cg.shareWords(state[0], id2sentence[self.graph.currentNode]):
+        if cg.shareWords(self.state[0], self.id2sentence[self.graph.currentNode]):
             done = True
             reward = 1
 
-        return self.id2sentence[self.graph.currentNode], reward, done
+        self.actions = self.graph.getAdjacentNodes()
+        self.state[1] = []
+        for actionID in self.actions:
+            self.state[1].append(self.id2sentence[actionID])
+        self.state[2].append(self.id2sentence[self.graph.currentNode])
+
+        return self.state, reward, done
