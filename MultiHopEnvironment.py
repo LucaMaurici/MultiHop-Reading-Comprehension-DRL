@@ -12,6 +12,7 @@ class MultiHopEnvironment:
     def reset(self):
         sample = self.dataset[random.randint(0, len(self.dataset)-1)]
         self.state = [sample['query']]
+        self.answer = sample['answer']
         
         self.graph, self.id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
         print("\n--- Graph: ---\n")
@@ -41,8 +42,9 @@ class MultiHopEnvironment:
             self.graph.goTo(self.actions[actionIndex])
         else:
             reward = -0.1
+            return self.state, reward, done
 
-        if cg.shareWords(self.state[0], self.id2sentence[self.graph.currentNode]):
+        if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
             done = True
             reward = 1
 
