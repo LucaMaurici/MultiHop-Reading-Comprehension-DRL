@@ -31,6 +31,7 @@ def buildCoreferenceGraph(question, documents):
     import pickle
 
     annotators = 'tokenize, ssplit, pos, lemma, ner, entitymentions, coref, sentiment, openie'
+    #annotators = ''
     options = {'openie.resolve_coref': True}
 
     nlp = StanfordCoreNLP(annotators=annotators, options=options)
@@ -311,7 +312,7 @@ def buildCoreferenceGraph(question, documents):
     pickle.dump(id2sentence, file)
     file.close()
 
-    return graph, id2sentence
+    return graph, id2sentence, []
 
     
 
