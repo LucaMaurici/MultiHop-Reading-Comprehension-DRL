@@ -1,6 +1,8 @@
 import CoreferenceGraph as cg
 import json
 import random
+import pickle
+import Graph_class as gs
 
 def getSampleById(dataset, id):
     for e in dataset:
@@ -15,7 +17,7 @@ class MultiHopEnvironment:
             self.dataset = json.load(read_file)
         #self.reset()
         with open('CoreferenceGraphsList.pkl', 'rb') as f:
-            graphs_list = pickle.load(f)
+            self.graphs_list = pickle.load(f)
         
 
     def reset(self):
@@ -29,7 +31,12 @@ class MultiHopEnvironment:
         print(self.graph.getEdges())
         '''
 
-        self.sampleId, self.graph, self.id2sentence, self.id2modSentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
+        graphSample = self.graphs_list[random.randint(0, len(self.graphs_list)-1)]
+        self.sampleId = graphSample['id']
+        self.graph = graphSample['graph']
+        self.id2sentence = graphSample['id2sentence']
+        self.id2modSentence = graphSample['id2modSentence']
+
         print("\n--- Graph: ---\n")
         print(self.graph.getEdges())
 

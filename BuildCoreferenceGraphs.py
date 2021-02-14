@@ -3,7 +3,7 @@ import CoreferenceGraph as cg
 import json
 import random
 
-N_GRAPHS = 15
+N_GRAPHS = 1
 
 with open("./Dataset/train.json", "r") as read_file:
     dataset = json.load(read_file)
