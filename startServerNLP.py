@@ -13,7 +13,8 @@ os.environ["CORENLP_HOME"] = "./corenlp"
 
 
 # start a CoreNLP client
-with CoreNLPClient(annotators=['tokenize','ssplit','pos','lemma','ner','parse','coref']) as client:
+#with CoreNLPClient(annotators=['tokenize','ssplit','pos','lemma','ner','parse','coref']) as client:
+with CoreNLPClient(annotators=['tokenize']) as client:
 	
 	# run annotation over input
 	ann = client.annotate('')
