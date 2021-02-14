@@ -13,8 +13,12 @@ def shareEntities(list1, list2):
             return True
     return False
 
-def shareWords(sentence1, sentence2):
-    list1 = sentence1.lower().split()
+def shareWords(questOrAns, sentence2):
+    print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
+    for token in nlp(questOrAns.lower()):
+        print(token, '->', token.pos)
+        print(token, '->', token.lemma)
+    list1 = questOrAns.lower().split()
     list2 = sentence2.lower().split()
     for e1 in list1:
         if e1 in list2:
