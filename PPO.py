@@ -51,28 +51,68 @@ class PPOMemory:
 
 class ActorNetwork(nn.Module):
 
-    def __init__(self, n_action, input_dims, alpha, checkpoint_dir='temp/ppo'):
+    #def __init__(self, n_action, input_dims, alpha, checkpoint_dir='temp/ppo'):
+    def __init__(self, alpha, checkpoint_dir='temp/ppo'):
         
         super(ActorNetwork, self).__init__()
 
-        '''
+        
         self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo')
         
-        self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
+        #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
 
-        #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         
         if T.cuda.is_available():
             self.device = T.device('cuda:0')
         else:
             self.device = T.device('cpu')
         self.to(self.device)
-        '''
+        
+        #--------------------------------------------------------
+        self.num_actions = 8
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        
 
+        self.conv2d = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 50, self.num_channels), 
+            kernel_size = (50, 1, 1))
+        self.conv2d_1 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 2, 1))
+        self.maxpool1d = nn.MaxPool1d(
+            kernel_size = (1, 50, 1), 
+            stride = 1)
+        self.linear = nn.Linear(
+            in_features = self.num_channels, 
+            out_features = 8)
+        self.softmax = nn.Softmax(
+            name = Softmax, 
+            dim = self.num_actions)
+        #--------------------------------------------------------
+
+    def forward(self, input):
+        conv2d_output = self.conv2d(input)
+        conv2d_output = f.relu_(conv2d_output)
+        conv2d_1_output = self.conv2d_1(input)
+        conv2d_1_output = f.relu_(conv2d_1_output)
+        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output), dim=0)
+        maxpool1d_output = self.maxpool1d(maxpool1d_input)
+        linear_output = self.linear(maxpool1d_output)
+        linear_output = f.relu_(linear_output)
+        softmax_output = self.softmax(linear_output)
+        
+        return softmax_output
+
+    '''
     def forward(self, state):
         dist = self.actor(state)
         dist = Categorical(dist)
         return dist
+    '''
 
     def save_checkpoint(self):
         T.save(self.state_dict(), self.checkpoint_file)
@@ -83,10 +123,12 @@ class ActorNetwork(nn.Module):
 
 
 class CriticNetwork(nn.Module):
-    def __init__(self, input_dims, alpha, checkpoint_dir='tmp/ppo'):
+    #def __init__(self, input_dims, alpha, checkpoint_dir='tmp/ppo'):
+    def __init__(self, alpha, checkpoint_dir='tmp/ppo'):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo')
+        '''
         self.critic = nn.Sequential(
                 nn.Linear(*input_dims, 256),
                 nn.ReLU(),
@@ -94,13 +136,54 @@ class CriticNetwork(nn.Module):
                 nn.ReLU(),
                 nn.Linear(128, 1)
         )
+        '''
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
 
+        #--------------------------------------------------------
+        self.num_actions = 8
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        
+
+        self.conv2d = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 50, self.num_channels), 
+            kernel_size = (50, 1, 1))
+        self.conv2d_1 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 2, 1))
+        self.maxpool1d = nn.MaxPool1d(
+            kernel_size = (1, 50, 1), 
+            stride = 1)
+        self.linear = nn.Linear(
+            in_features = self.num_channels, 
+            out_features = 8)
+        self.softmax = nn.Softmax(
+            name = Softmax, 
+            dim = self.num_actions)
+        #--------------------------------------------------------
+
+    def forward(self, input):
+        conv2d_output = self.conv2d(input)
+        conv2d_output = f.relu_(conv2d_output)
+        conv2d_1_output = self.conv2d_1(input)
+        conv2d_1_output = f.relu_(conv2d_1_output)
+        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output), dim=0)
+        maxpool1d_output = self.maxpool1d(maxpool1d_input)
+        linear_output = self.linear(maxpool1d_output)
+        linear_output = f.relu_(linear_output)
+        softmax_output = self.softmax(linear_output)
+        
+        return softmax_output
+
+    '''
     def forward(self, state):
         return self.critic(state)
+    '''
 
     def save_checkpoint(self):
         T.save(self.state_dict(), self.checkpoint_file)
