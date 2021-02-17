@@ -1,3 +1,10 @@
+from pynlp import StanfordCoreNLP
+#from nltk import tokenize
+#import nltk
+#nltk.download('punkt')
+import Graph_class as gs
+import pickle
+
 def indexer(docNumber, sentenceIndex):
     return 'd'+str(docNumber) + 's'+str(sentenceIndex)
 
@@ -13,6 +20,7 @@ def shareEntities(list1, list2):
             return True
     return False
 
+'''
 def shareWords(questOrAns, sentence2):
     print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
     for token in nlp(questOrAns.lower()):
@@ -24,15 +32,37 @@ def shareWords(questOrAns, sentence2):
         if e1 in list2:
             return True
     return False
+'''
+def keepMeaningfulWords(questOrAns):
+    annotators = 'pos, lemma'
+    nlp = StanfordCoreNLP(annotators=annotators)
+    #print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
+    questOrAns = questOrAns.lower()
+    for token in nlp(questOrAns)[0]:
+        #print(token, '->', token.pos)
+        #print(token, '->', token.lemma)
+        if token.pos == 'IN' or token.pos=='CC' or token.pos=='DT' or token.pos=='PRP' or token.pos=='PRP$' or token.pos=='TO' \
+            or token.pos == 'WDT' or token.pos == 'WP' or token.pos == 'WP$' or token.pos == 'WRB':
+            for char in ['.',';','?','!',':','"','\'']:
+                questOrAns = questOrAns.replace(' '+str(token)+char, char)
+            questOrAns = questOrAns.replace(' ' + str(token) + ' ', ' ')
+            #print(questOrAns)
+        if token.lemma=='be' or token.lemma=='have':
+            questOrAns = questOrAns.replace(' ' + str(token) + ' ', ' ')
+    #print("\n✪✪✪ SENTENCE: ✪✪✪\n")
+    #print('QuestOrAns: ', questOrAns)
+    return questOrAns
+
+def shareWords(questOrAns, sentence2):
+    questOrAns = keepMeaningfulWords(questOrAns)
+    list1 = questOrAns.split()
+    list2 = sentence2.lower().split()
+    for e1 in list1:
+        if e1 in list2:
+            return True
+    return False
 
 def buildCoreferenceGraph(question, documents):
-
-    from pynlp import StanfordCoreNLP
-    #from nltk import tokenize
-    #import nltk
-    #nltk.download('punkt')
-    import Graph_class as gs
-    import pickle
 
     annotators = 'tokenize, ssplit, pos, lemma, ner, entitymentions, coref, sentiment, openie'
     #annotators = ''
@@ -316,7 +346,7 @@ def buildCoreferenceGraph(question, documents):
     pickle.dump(id2sentence, file)
     file.close()
 
-    return graph, id2sentence, []
+    return graph, id2sentence
 
     
 

@@ -7,21 +7,21 @@ options = {'openie.resolve_coref': True}
 nlp = StanfordCoreNLP(annotators=annotators, options=options)
 
 def shareWords(questOrAns, sentence2):
-    print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
+    #print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
     questOrAns = questOrAns.lower()
     for token in nlp(questOrAns)[0]:
-        print(token, '->', token.pos)
-        print(token, '->', token.lemma)
+        #print(token, '->', token.pos)
+        #print(token, '->', token.lemma)
         if token.pos == 'IN' or token.pos=='CC' or token.pos=='DT' or token.pos=='PRP' or token.pos=='PRP$' or token.pos=='TO' \
             or token.pos == 'WDT' or token.pos == 'WP' or token.pos == 'WP$' or token.pos == 'WRB':
-            print('EEE')
+            for char in ['.',';','?','!',':','"','\'']:
+                questOrAns = questOrAns.replace(' '+str(token)+char, char)
             questOrAns = questOrAns.replace(' ' + str(token) + ' ', ' ')
-            #print(token.pos)
-            print(questOrAns)
+            #print(questOrAns)
         if token.lemma=='be' or token.lemma=='have':
             questOrAns = questOrAns.replace(' ' + str(token) + ' ', ' ')
-    print("\n✪✪✪ SENTENCE: ✪✪✪\n")
-    print(questOrAns)
+    #print("\n✪✪✪ SENTENCE: ✪✪✪\n")
+    #print(questOrAns)
     list1 = questOrAns.lower().split()
     list2 = sentence2.lower().split()
     for e1 in list1:

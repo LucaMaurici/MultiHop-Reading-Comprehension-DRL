@@ -35,10 +35,9 @@ class MultiHopEnvironment:
         self.sampleId = graphSample['id']
         self.graph = graphSample['graph']
         self.id2sentence = graphSample['id2sentence']
-        self.id2modSentence = graphSample['id2modSentence']
 
-        print("\n--- Graph: ---\n")
-        print(self.graph.getEdges())
+        #print("\n--- Graph: ---\n")
+        #print(self.graph.getEdges())
 
         sample = getSampleById(self.dataset, self.sampleId)
         self.state = [sample['query']]
