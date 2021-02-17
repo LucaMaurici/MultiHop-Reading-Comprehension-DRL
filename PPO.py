@@ -71,10 +71,15 @@ class ActorNetwork(nn.Module):
         
         #--------------------------------------------------------
         self.num_actions = 8
+        self.num_channels = self.num_actions+30+1
         self.num_accepted = 30
-        self.num_channels = self.num_actions+self.num_accepted+1
-        
 
+        self.embedding = nn.Embedding(
+            num_embeddings = 87429, 
+            embedding_dim = 50, 
+            padding_idx = 50, 
+            max_norm = 1, 
+            _weight = 2500)
         self.conv2d = nn.Conv2d(
             in_channels = (50, 50, self.num_channels), 
             out_channels = (1, 50, self.num_channels), 
@@ -83,6 +88,18 @@ class ActorNetwork(nn.Module):
             in_channels = (50, 50, self.num_channels), 
             out_channels = (1, 48, self.num_channels), 
             kernel_size = (50, 2, 1))
+        self.conv2d_2 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 5, 1))
+        self.conv2d_3 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 10, 1))
+        self.conv2d_4 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 20, 1))
         self.maxpool1d = nn.MaxPool1d(
             kernel_size = (1, 50, 1), 
             stride = 1)
@@ -92,20 +109,26 @@ class ActorNetwork(nn.Module):
         self.softmax = nn.Softmax(
             name = Softmax, 
             dim = self.num_actions)
-        #--------------------------------------------------------
 
     def forward(self, input):
-        conv2d_output = self.conv2d(input)
+        embedding_output = self.embedding(input)
+        conv2d_output = self.conv2d(embedding_output)
         conv2d_output = f.relu_(conv2d_output)
-        conv2d_1_output = self.conv2d_1(input)
+        conv2d_1_output = self.conv2d_1(embedding_output)
         conv2d_1_output = f.relu_(conv2d_1_output)
-        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output), dim=0)
+        conv2d_2_output = self.conv2d_2(embedding_output)
+        conv2d_2_output = f.relu_(conv2d_2_output)
+        conv2d_3_output = self.conv2d_3(embedding_output)
+        conv2d_4_output = self.conv2d_4(embedding_output)
+        conv2d_4_output = f.relu_(conv2d_4_output)
+        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output, conv2d_2_output, conv2d_3_output, conv2d_4_output), dim=0)
         maxpool1d_output = self.maxpool1d(maxpool1d_input)
         linear_output = self.linear(maxpool1d_output)
         linear_output = f.relu_(linear_output)
         softmax_output = self.softmax(linear_output)
         
         return softmax_output
+    #------------------------------------------------------------
 
     '''
     def forward(self, state):
@@ -144,10 +167,15 @@ class CriticNetwork(nn.Module):
 
         #--------------------------------------------------------
         self.num_actions = 8
+        self.num_channels = self.num_actions+30+1
         self.num_accepted = 30
-        self.num_channels = self.num_actions+self.num_accepted+1
-        
 
+        self.embedding = nn.Embedding(
+            num_embeddings = 87429, 
+            embedding_dim = 50, 
+            padding_idx = 50, 
+            max_norm = 1, 
+            _weight = 2500)
         self.conv2d = nn.Conv2d(
             in_channels = (50, 50, self.num_channels), 
             out_channels = (1, 50, self.num_channels), 
@@ -156,29 +184,43 @@ class CriticNetwork(nn.Module):
             in_channels = (50, 50, self.num_channels), 
             out_channels = (1, 48, self.num_channels), 
             kernel_size = (50, 2, 1))
+        self.conv2d_2 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 5, 1))
+        self.conv2d_3 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 10, 1))
+        self.conv2d_4 = nn.Conv2d(
+            in_channels = (50, 50, self.num_channels), 
+            out_channels = (1, 48, self.num_channels), 
+            kernel_size = (50, 20, 1))
         self.maxpool1d = nn.MaxPool1d(
             kernel_size = (1, 50, 1), 
             stride = 1)
         self.linear = nn.Linear(
             in_features = self.num_channels, 
-            out_features = 8)
-        self.softmax = nn.Softmax(
-            name = Softmax, 
-            dim = self.num_actions)
-        #--------------------------------------------------------
+            out_features = 1)
+
 
     def forward(self, input):
-        conv2d_output = self.conv2d(input)
+        embedding_output = self.embedding(input)
+        conv2d_output = self.conv2d(embedding_output)
         conv2d_output = f.relu_(conv2d_output)
-        conv2d_1_output = self.conv2d_1(input)
+        conv2d_1_output = self.conv2d_1(embedding_output)
         conv2d_1_output = f.relu_(conv2d_1_output)
-        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output), dim=0)
+        conv2d_2_output = self.conv2d_2(embedding_output)
+        conv2d_2_output = f.relu_(conv2d_2_output)
+        conv2d_3_output = self.conv2d_3(embedding_output)
+        conv2d_4_output = self.conv2d_4(embedding_output)
+        conv2d_4_output = f.relu_(conv2d_4_output)
+        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output, conv2d_2_output, conv2d_3_output, conv2d_4_output), dim=0)
         maxpool1d_output = self.maxpool1d(maxpool1d_input)
         linear_output = self.linear(maxpool1d_output)
-        linear_output = f.relu_(linear_output)
-        softmax_output = self.softmax(linear_output)
         
-        return softmax_output
+        return linear_output
+    #------------------------------------------------------------
 
     '''
     def forward(self, state):
