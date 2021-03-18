@@ -60,26 +60,18 @@ class ActorNetwork(nn.Module):
         self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo')
         
         #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
-
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        
-        if T.cuda.is_available():
-            self.device = T.device('cuda:0')
-        else:
-            self.device = T.device('cpu')
-        self.to(self.device)
         
         #--------------------------------------------------------
         self.num_actions = 8
         self.num_channels = self.num_actions+30+1
         self.num_accepted = 30
 
+        '''
         self.embedding = nn.Embedding(
             num_embeddings = 87429, 
             embedding_dim = 50, 
             padding_idx = 50, 
-            max_norm = 1, 
-            _weight = 2500)
+            max_norm = 1)
         self.conv2d = nn.Conv2d(
             in_channels = (50, 50, self.num_channels), 
             out_channels = (1, 50, self.num_channels), 
@@ -109,6 +101,52 @@ class ActorNetwork(nn.Module):
         self.softmax = nn.Softmax(
             name = Softmax, 
             dim = self.num_actions)
+        '''
+        self.embedding = nn.Embedding(
+            num_embeddings = 87429, 
+            embedding_dim = 50, 
+            padding_idx = 50, 
+            max_norm = 1)
+        self.conv2d = nn.Conv2d(
+            in_channels = self.num_channels,
+            out_channels = self.num_channels,
+            kernel_size = (50, 1, 1))
+        self.conv2d_1 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels,
+            kernel_size = (50, 2, 1))
+        self.conv2d_2 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels,
+            kernel_size = (50, 5, 1))
+        self.conv2d_3 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels,
+            kernel_size = (50, 10, 1))
+        self.conv2d_4 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels,
+            kernel_size = (50, 20, 1))
+        self.maxpool1d = nn.MaxPool1d(
+            kernel_size = (1, 50, 1), 
+            stride = 1)
+        self.linear = nn.Linear(
+            in_features = self.num_channels, 
+            out_features = 8)
+        self.softmax = nn.Softmax(
+            dim = self.num_actions)
+
+
+        
+        
+        if T.cuda.is_available():
+            self.device = T.device('cuda:0')
+        else:
+            self.device = T.device('cpu')
+        self.to(self.device)
+
+        #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+
 
     def forward(self, input):
         embedding_output = self.embedding(input)
@@ -161,9 +199,8 @@ class CriticNetwork(nn.Module):
         )
         '''
 
-        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
-        self.to(self.device)
+        #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
+        
 
         #--------------------------------------------------------
         self.num_actions = 8
@@ -174,27 +211,26 @@ class CriticNetwork(nn.Module):
             num_embeddings = 87429, 
             embedding_dim = 50, 
             padding_idx = 50, 
-            max_norm = 1, 
-            _weight = 2500)
+            max_norm = 1)
         self.conv2d = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 50, self.num_channels), 
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels, 
             kernel_size = (50, 1, 1))
         self.conv2d_1 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels, 
             kernel_size = (50, 2, 1))
         self.conv2d_2 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels, 
             kernel_size = (50, 5, 1))
         self.conv2d_3 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels, 
             kernel_size = (50, 10, 1))
         self.conv2d_4 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
+            in_channels = self.num_channels, 
+            out_channels = self.num_channels, 
             kernel_size = (50, 20, 1))
         self.maxpool1d = nn.MaxPool1d(
             kernel_size = (1, 50, 1), 
@@ -202,6 +238,10 @@ class CriticNetwork(nn.Module):
         self.linear = nn.Linear(
             in_features = self.num_channels, 
             out_features = 1)
+
+
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
 
 
     def forward(self, input):
@@ -234,15 +274,22 @@ class CriticNetwork(nn.Module):
         self.load_state_dict(T.load(self.checkpoint_file))
 
 class Agent:
-    def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
+    #def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
+            #policy_clip=0.2, batch_size=64, n_epochs=10):
+    def __init__(self, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
             policy_clip=0.2, batch_size=64, n_epochs=10):
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
 
-        self.actor = ActorNetwork(n_actions, input_dims, alpha)
-        self.critic = CriticNetwork(input_dims, alpha)
+        #self.actor = ActorNetwork(n_actions, input_dims, alpha)
+        #self.critic = CriticNetwork(input_dims, alpha)
+        self.actor = ActorNetwork(alpha)
+        self.actor.optimizer = optim.Adam(self.actor.parameters(), lr=alpha)
+        #self.optimizer = optim.Adam(self.actor.parameters(), lr=alpha)
+        self.critic = CriticNetwork(alpha)
+        self.critic.optimizer = optim.Adam(self.critic.parameters(), lr=alpha)
         self.memory = PPOMemory(batch_size)
        
     def remember(self, state, action, probs, vals, reward, done):
