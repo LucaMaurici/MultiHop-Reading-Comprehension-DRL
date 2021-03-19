@@ -40,7 +40,7 @@ class MultiHopEnvironment:
         #print(self.graph.getEdges())
 
         sample = getSampleById(self.dataset, self.sampleId)
-        self.state = [sample['query']]
+        self.state = [sample['query']] #  state[0] = query
         self.answer = sample['answer']
 
 
