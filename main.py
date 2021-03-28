@@ -2,10 +2,16 @@ import numpy as np
 from PPO import Agent
 from utils import plot_learning_curve
 from MultiHopEnvironment import MultiHopEnvironment
+import dill
 
 if __name__ == '__main__':
     env = MultiHopEnvironment()
     state = env.reset()
+
+    encoder = None
+    with open('StaticTokenizerEncoder.pkl', 'rb') as f:
+        encoder = dill.load(f)
+    print('Encoder opened')
 
     N = 100
     n_actions = 8
@@ -24,6 +30,7 @@ if __name__ == '__main__':
 
     for idx_episodes in range(n_episodes):
         observationOld = env.reset()
+        print(observationOld)
         done = False
         score = 0
         idx_steps = 0

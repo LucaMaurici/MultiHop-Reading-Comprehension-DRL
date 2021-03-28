@@ -32,7 +32,7 @@ for graphSample in graphs_list:
 
 print('Data loaded')
 
-encoder = StaticTokenizerEncoder(loaded_data, tokenize=lambda s: s.split())
+encoder = StaticTokenizerEncoder(loaded_data, min_occurrences=3, tokenize=lambda s: s.split())
 
 print('Encoder fitted')
 
@@ -51,4 +51,5 @@ print('Encoder opened')
 #encoded_data = [encoder.encode(example) for example in example_data]
 #print(encoded_data)
 print(encoder.vocab)
+
 print(len(encoder.vocab))

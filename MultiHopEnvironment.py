@@ -3,12 +3,86 @@ import json
 import random
 import pickle
 import Graph_class as gs
+import dill
+from torchnlp.encoders.text import StaticTokenizerEncoder, stack_and_pad_tensors, pad_tensor
+import numpy as np
 
 def getSampleById(dataset, id):
     for e in dataset:
         if e['id'] == id:
             return e
     return None
+
+'''
+def encodeState(state, encoder):
+    encodedState = list()
+    for i, e in enumerate(state):
+        if i==0:
+            encodedState.append(encoder.encode(e).numpy())
+        else:
+            encodedState.append(list())
+            for sentence in e:
+                encodedState[i].append(encoder.encode(sentence).numpy())
+            encodedState[i] = np.array(encodedState[i])
+    print("\n---Numpy---")
+    print(np.array(encodedState))
+    return np.array(encodedState)
+'''
+'''
+def encodeState(state, encoder):
+    encodedState = list()
+    for i, e in enumerate(state):
+        if i==0:
+            encodedState.append(encoder.encode(e).numpy())
+        else:
+            for sentence in e:
+                encodedState.append(encoder.encode(sentence).numpy())
+            encodedState = np.array(encodedState)
+    print("\n---Numpy---")
+    print(np.array(encodedState))
+    return np.array(encodedState)
+'''
+
+def padState(state):
+    MAX_LEN = 50
+    newState = list()
+    print(newState)
+    for i, e in enumerate(state):
+        print(e)
+        trueLen = len(e)
+        if trueLen > 50:
+            newState.append(e[:50])
+        else:
+            for i in range (50 - trueLen):
+                e.append(0)
+            newState.append(e)
+            print(newState)
+    print(newState)
+    return newState
+
+def encodeState(state, encoder):
+    encodedState = list()
+    for i, e in enumerate(state):
+        if i==0:
+            encodedState.append(encoder.encode(e).tolist())
+        elif i==1:
+            num = 0
+            for sentence in e:
+                encodedState.append(encoder.encode(sentence).tolist())
+                num +=1
+            for j in range(8-num):
+                encodedState.append(list())
+        elif i==2:
+            num = 0
+            for sentence in e:
+                encodedState.append(encoder.encode(sentence).tolist())
+                num +=1
+            for j in range(30-num):
+                encodedState.append(list())
+    print("\n---Numpy---")
+    print(encodedState)
+    encodedState = padState(encodedState)
+    return encodedState
 
 class MultiHopEnvironment:
 
@@ -18,6 +92,10 @@ class MultiHopEnvironment:
         #self.reset()
         with open('CoreferenceGraphsList.pkl', 'rb') as f:
             self.graphs_list = pickle.load(f)
+
+        with open('StaticTokenizerEncoder.pkl', 'rb') as f:
+            self.encoder = dill.load(f)
+        print('Encoder opened')
         
 
     def reset(self):
@@ -58,7 +136,10 @@ class MultiHopEnvironment:
         self.state.append(list())
         #self.done = False
 
-        return self.state
+        output = encodeState(self.state, self.encoder)
+        print("\n---STATE DOPO RESET---")
+        #print(output)
+        return output
 
 
     def step(self, actionIndex):
@@ -81,4 +162,8 @@ class MultiHopEnvironment:
             self.state[1].append(self.id2sentence[actionID])
         self.state[2].append(self.id2sentence[self.graph.currentNode])
 
-        return self.state, reward, done
+        return np.array(encodeState(self.state, self.encoder), dtype=object), reward, done
+
+
+#  state[0] = query
+#  state[1] = 

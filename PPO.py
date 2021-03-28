@@ -4,6 +4,7 @@ import torch as T
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
+import numpy as np
 
 class PPOMemory:
     def __init__(self, batch_size):
@@ -105,12 +106,16 @@ class ActorNetwork(nn.Module):
         self.embedding = nn.Embedding(
             num_embeddings = 87429, 
             embedding_dim = 50, 
-            padding_idx = 50, 
+            #padding_idx = 50, 
             max_norm = 1)
         self.conv2d = nn.Conv2d(
             in_channels = self.num_channels,
             out_channels = self.num_channels,
-            kernel_size = (50, 1, 1))
+            kernel_size = (1, 1, 50),
+            #stride = [1,1,0],
+            #padding = [0,1,0],
+            #dilation = [1,1,1]
+            )
         self.conv2d_1 = nn.Conv2d(
             in_channels = self.num_channels, 
             out_channels = self.num_channels,
@@ -150,6 +155,7 @@ class ActorNetwork(nn.Module):
 
     def forward(self, input):
         embedding_output = self.embedding(input)
+        print(embedding_output.shape)
         conv2d_output = self.conv2d(embedding_output)
         conv2d_output = f.relu_(conv2d_output)
         conv2d_1_output = self.conv2d_1(embedding_output)
@@ -306,7 +312,14 @@ class Agent:
         self.critic.load_checkpoint()
 
     def choose_action(self, observation):
-        state = T.tensor([observation], dtype=T.float).to(self.actor.device)
+        print("\n---OBSERVATION---")
+        #observation = observation.astype('int64')
+        #print(np.array(observation))
+        state = T.tensor(observation).to(self.actor.device).long()
+        #state = state.unsqueeze_(0)
+        #state = state.permute(0,3,1,2)
+        print("\n---SHAPE---")
+        print(np.shape(state))
 
         dist = self.actor(state)
         value = self.critic(state)
