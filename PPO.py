@@ -1,7 +1,7 @@
 import os
-import numpy as no
-import torch as T
+import torch
 import torch.nn as nn
+import torch.nn.functional as f
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
 import numpy as np
@@ -64,8 +64,9 @@ class ActorNetwork(nn.Module):
         
         #--------------------------------------------------------
         self.num_actions = 8
-        self.num_channels = self.num_actions+30+1
         self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        
 
         '''
         self.embedding = nn.Embedding(
@@ -102,6 +103,7 @@ class ActorNetwork(nn.Module):
         self.softmax = nn.Softmax(
             name = Softmax, 
             dim = self.num_actions)
+        '''
         '''
         self.embedding = nn.Embedding(
             num_embeddings = 87429, 
@@ -140,34 +142,81 @@ class ActorNetwork(nn.Module):
             out_features = 8)
         self.softmax = nn.Softmax(
             dim = self.num_actions)
-
+        '''
+        self.embedding = nn.Embedding(
+            num_embeddings = 87429,
+            embedding_dim = 51, 
+            #padding_idx = 50, 
+            max_norm = 1)
+        self.conv2d_0 = nn.Conv2d(
+            in_channels = self.num_channels,
+            out_channels = 1,
+            kernel_size = (1, 51))
+        self.conv2d_1 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = 1,
+            kernel_size = (2, 51))
+        self.conv2d_2 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = 1,
+            kernel_size = (5, 51))
+        self.conv2d_3 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = 1,
+            kernel_size = (10, 51))
+        self.conv2d_4 = nn.Conv2d(
+            in_channels = self.num_channels, 
+            out_channels = 1,
+            kernel_size = (20, 51))
+        #self.maxpool1d = nn.MaxPool1d(
+            #kernel_size = (), 
+            #stride = 1)
+        self.linear = nn.Linear(
+            in_features = 5,
+            out_features = 8)
+        self.softmax = nn.Softmax(0)
+        
 
         
         
-        if T.cuda.is_available():
-            self.device = T.device('cuda:0')
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda:0')
         else:
-            self.device = T.device('cpu')
+            self.device = torch.device('cpu')
         self.to(self.device)
 
         #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
 
     def forward(self, input):
+        print("\n---INPUT---\n")
         embedding_output = self.embedding(input)
-        print(embedding_output.shape)
-        conv2d_output = self.conv2d(embedding_output)
-        conv2d_output = f.relu_(conv2d_output)
+        
+        conv2d_0_output = self.conv2d_0(embedding_output)
+        conv2d_0_output = f.relu_(conv2d_0_output)
         conv2d_1_output = self.conv2d_1(embedding_output)
         conv2d_1_output = f.relu_(conv2d_1_output)
         conv2d_2_output = self.conv2d_2(embedding_output)
         conv2d_2_output = f.relu_(conv2d_2_output)
         conv2d_3_output = self.conv2d_3(embedding_output)
+        conv2d_3_output = f.relu_(conv2d_3_output)
         conv2d_4_output = self.conv2d_4(embedding_output)
         conv2d_4_output = f.relu_(conv2d_4_output)
-        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output, conv2d_2_output, conv2d_3_output, conv2d_4_output), dim=0)
-        maxpool1d_output = self.maxpool1d(maxpool1d_input)
-        linear_output = self.linear(maxpool1d_output)
+
+        max_0_output = torch.max(conv2d_0_output)
+        max_1_output = torch.max(conv2d_1_output)
+        max_2_output = torch.max(conv2d_2_output)
+        max_3_output = torch.max(conv2d_3_output)
+        max_4_output = torch.max(conv2d_4_output)
+
+        print(max_0_output)
+        print(max_0_output.shape)
+
+        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
+
+        #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
+        #maxpool1d_output = self.maxpool1d(maxpool1d_input)
+        linear_output = self.linear(linear_input)
         linear_output = f.relu_(linear_output)
         softmax_output = self.softmax(linear_output)
         
@@ -182,10 +231,10 @@ class ActorNetwork(nn.Module):
     '''
 
     def save_checkpoint(self):
-        T.save(self.state_dict(), self.checkpoint_file)
+        torch.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        self.load_state_dict(T.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file))
 
 
 
@@ -210,60 +259,73 @@ class CriticNetwork(nn.Module):
 
         #--------------------------------------------------------
         self.num_actions = 8
-        self.num_channels = self.num_actions+30+1
         self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+
 
         self.embedding = nn.Embedding(
-            num_embeddings = 87429, 
-            embedding_dim = 50, 
-            padding_idx = 50, 
+            num_embeddings = 87429,
+            embedding_dim = 51, 
+            #padding_idx = 50, 
             max_norm = 1)
-        self.conv2d = nn.Conv2d(
-            in_channels = self.num_channels, 
-            out_channels = self.num_channels, 
-            kernel_size = (50, 1, 1))
+        self.conv2d_0 = nn.Conv2d(
+            in_channels = self.num_channels,
+            out_channels = 1,
+            kernel_size = (1, 51))
         self.conv2d_1 = nn.Conv2d(
             in_channels = self.num_channels, 
-            out_channels = self.num_channels, 
-            kernel_size = (50, 2, 1))
+            out_channels = 1,
+            kernel_size = (2, 51))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.num_channels, 
-            out_channels = self.num_channels, 
-            kernel_size = (50, 5, 1))
+            out_channels = 1,
+            kernel_size = (5, 51))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.num_channels, 
-            out_channels = self.num_channels, 
-            kernel_size = (50, 10, 1))
+            out_channels = 1,
+            kernel_size = (10, 51))
         self.conv2d_4 = nn.Conv2d(
             in_channels = self.num_channels, 
-            out_channels = self.num_channels, 
-            kernel_size = (50, 20, 1))
-        self.maxpool1d = nn.MaxPool1d(
-            kernel_size = (1, 50, 1), 
-            stride = 1)
+            out_channels = 1,
+            kernel_size = (20, 51))
+        #self.maxpool1d = nn.MaxPool1d(
+            #kernel_size = (), 
+            #stride = 1)
         self.linear = nn.Linear(
-            in_features = self.num_channels, 
-            out_features = 1)
+            in_features = 5,
+            out_features = 8)
 
 
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
 
 
     def forward(self, input):
         embedding_output = self.embedding(input)
-        conv2d_output = self.conv2d(embedding_output)
-        conv2d_output = f.relu_(conv2d_output)
+        
+        conv2d_0_output = self.conv2d_0(embedding_output)
+        conv2d_0_output = f.relu_(conv2d_0_output)
         conv2d_1_output = self.conv2d_1(embedding_output)
         conv2d_1_output = f.relu_(conv2d_1_output)
         conv2d_2_output = self.conv2d_2(embedding_output)
         conv2d_2_output = f.relu_(conv2d_2_output)
         conv2d_3_output = self.conv2d_3(embedding_output)
+        conv2d_3_output = f.relu_(conv2d_3_output)
         conv2d_4_output = self.conv2d_4(embedding_output)
         conv2d_4_output = f.relu_(conv2d_4_output)
-        maxpool1d_input = torch.cat((conv2d_output, conv2d_1_output, conv2d_2_output, conv2d_3_output, conv2d_4_output), dim=0)
-        maxpool1d_output = self.maxpool1d(maxpool1d_input)
-        linear_output = self.linear(maxpool1d_output)
+
+        max_0_output = torch.max(conv2d_0_output)
+        max_1_output = torch.max(conv2d_1_output)
+        max_2_output = torch.max(conv2d_2_output)
+        max_3_output = torch.max(conv2d_3_output)
+        max_4_output = torch.max(conv2d_4_output)
+
+        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
+
+        #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
+        #maxpool1d_output = self.maxpool1d(maxpool1d_input)
+        linear_output = self.linear(linear_input)
+        linear_output = f.relu_(linear_output)
         
         return linear_output
     #------------------------------------------------------------
@@ -274,10 +336,10 @@ class CriticNetwork(nn.Module):
     '''
 
     def save_checkpoint(self):
-        T.save(self.state_dict(), self.checkpoint_file)
+        torch.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        self.load_state_dict(T.load(self.checkpoint_file))
+        self.load_state_dict(torch.load(self.checkpoint_file))
 
 class Agent:
     #def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
@@ -315,19 +377,25 @@ class Agent:
         print("\n---OBSERVATION---")
         #observation = observation.astype('int64')
         #print(np.array(observation))
-        state = T.tensor(observation).to(self.actor.device).long()
+        state = torch.tensor(observation).to(self.actor.device).long()
         #state = state.unsqueeze_(0)
         #state = state.permute(0,3,1,2)
         print("\n---SHAPE---")
         print(np.shape(state))
 
-        dist = self.actor(state)
-        value = self.critic(state)
+        dist = self.actor(state.unsqueeze(0))
+        value = self.critic(state.unsqueeze(0))
+        print(dist)
+        dist = Categorical(dist)
+        
         action = dist.sample()
 
-        probs = T.squeeze(dist.log_prob(action)).item()
-        action = T.squeeze(action).item()
-        value = T.squeeze(value).item()
+        probs = torch.squeeze(dist.log_prob(action)).item()
+        print(probs)
+        action = torch.squeeze(action).item()
+        print(action)
+        value = torch.squeeze(value).item()
+        print(value)
 
         return action, probs, value
 
@@ -348,26 +416,26 @@ class Agent:
                             (1-int(dones_arr[k])) - values[k])
                     discount *= self.gamma*self.gae_lambda
                 advantage[t] = a_t
-            advantage = T.tensor(advantage).to(self.actor.device)
+            advantage = torch.tensor(advantage).to(self.actor.device)
 
-            values = T.tensor(values).to(self.actor.device)
+            values = torch.tensor(values).to(self.actor.device)
             for batch in batches:
-                states = T.tensor(state_arr[batch], dtype=T.float).to(self.actor.device)
-                old_probs = T.tensor(old_prob_arr[batch]).to(self.actor.device)
-                actions = T.tensor(action_arr[batch]).to(self.actor.device)
+                states = torch.tensor(state_arr[batch], dtype=torch.float).to(self.actor.device)
+                old_probs = torch.tensor(old_prob_arr[batch]).to(self.actor.device)
+                actions = torch.tensor(action_arr[batch]).to(self.actor.device)
 
                 dist = self.actor(states)
                 critic_value = self.critic(states)
 
-                critic_value = T.squeeze(critic_value)
+                critic_value = torch.squeeze(critic_value)
 
                 new_probs = dist.log_prob(actions)
                 prob_ratio = new_probs.exp() / old_probs.exp()
                 #prob_ratio = (new_probs - old_probs).exp()
                 weighted_probs = advantage[batch] * prob_ratio
-                weighted_clipped_probs = T.clamp(prob_ratio, 1-self.policy_clip,
+                weighted_clipped_probs = torch.clamp(prob_ratio, 1-self.policy_clip,
                         1+self.policy_clip)*advantage[batch]
-                actor_loss = -T.min(weighted_probs, weighted_clipped_probs).mean()
+                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
 
                 returns = advantage[batch] + values[batch]
                 critic_loss = (returns-critic_value)**2

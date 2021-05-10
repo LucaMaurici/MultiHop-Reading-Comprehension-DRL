@@ -61,6 +61,7 @@ def padState(state):
     return newState
 
 def encodeState(state, encoder):
+    print(state)
     encodedState = list()
     for i, e in enumerate(state):
         if i==0:
@@ -130,11 +131,11 @@ class MultiHopEnvironment:
 
         
         self.actions = self.graph.getAdjacentNodes()
-        self.state.append(list())
+        self.state.append(list()) #  state[1] = sentences representing the possible actions
         for actionID in self.actions:
             self.state[1].append(self.id2sentence[actionID])
 
-        self.state.append(list())
+        self.state.append(list()) #  state[2] = sentences representing the history of my hopes, initially empty
         #self.done = False
 
         output = encodeState(self.state, self.encoder)
