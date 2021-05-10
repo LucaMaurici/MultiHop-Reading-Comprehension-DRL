@@ -187,3 +187,5 @@ corenlp/tokensregex/color.rules.txt
 corenlp/tokensregex/retokenize.txt
 corenlp/xom-1.3.2-sources.jar
 corenlp/xom.jar
+corenlp/istack-commons-runtime-3.0.7-sources.jar
+*.jar
