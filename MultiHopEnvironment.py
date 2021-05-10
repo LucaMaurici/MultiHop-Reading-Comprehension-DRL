@@ -87,7 +87,8 @@ def encodeState(state, encoder):
 class MultiHopEnvironment:
 
     def __init__(self):
-        with open("./Dataset/train.json", "r") as read_file:
+        #with open("./Dataset/train.json", "r") as read_file:
+        with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
             self.dataset = json.load(read_file)
         #self.reset()
         with open('CoreferenceGraphsList.pkl', 'rb') as f:

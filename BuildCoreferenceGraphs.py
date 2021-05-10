@@ -5,7 +5,7 @@ import random
 
 N_GRAPHS = 960
 
-with open("./Dataset/train.json", "r") as read_file:
+with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
     dataset = json.load(read_file)
 read_file.close()
 
@@ -25,6 +25,7 @@ for i in range(N_GRAPHS):
     try:
         graph, id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
     except:
+        print("\n!!! ERROR in building a graph !!!\n")
         continue
     
     #graph, id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
