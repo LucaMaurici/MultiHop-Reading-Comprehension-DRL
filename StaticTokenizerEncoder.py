@@ -11,7 +11,7 @@ def getSampleById(dataset, id):
 
 print('Start')
 
-with open("./Dataset/train.json", "r") as read_file:
+with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
     dataset = json.load(read_file)
 
 print('Dataset loaded')
@@ -53,3 +53,5 @@ print('Encoder opened')
 print(encoder.vocab)
 
 print(len(encoder.vocab))
+
+print(encoder.encode("Oparara Valerio"))
