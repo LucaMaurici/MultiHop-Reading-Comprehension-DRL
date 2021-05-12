@@ -8,7 +8,7 @@ import numpy as np
 
 class PPOMemory:
     def __init__(self, batch_size):
-        self.state = []
+        self.states = []
         self.actions = []
         self.probs = []
         self.vals = []
@@ -20,6 +20,7 @@ class PPOMemory:
     def generate_batches(self):
         n_states = len(self.states)
         batch_start = np.arange(0, n_states, self.batch_size)
+        #indices = np.arange(n_states, dtype=np.int64)
         indices = np.arange(n_states, dtype=np.int64)
         np.random.shuffle(indices)
         batches = [indices[i:i+self.batch_size] for i in batch_start]
@@ -33,6 +34,9 @@ class PPOMemory:
                 batches
 
     def store_memory(self, state, action, probs, vals, reward, done):
+        print("\n\n---STATE---")
+        #state = [item for sublist in state for item in sublist]  # flatten the state from a list of lists into a list
+        print(state)
         self.states.append(state)
         self.actions.append(action)
         self.probs.append(probs)
@@ -53,12 +57,12 @@ class PPOMemory:
 class ActorNetwork(nn.Module):
 
     #def __init__(self, n_action, input_dims, alpha, checkpoint_dir='temp/ppo'):
-    def __init__(self, alpha, checkpoint_dir='temp/ppo'):
+    def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
         
         super(ActorNetwork, self).__init__()
 
-        
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo')
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo.pth')
         
         #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
         
@@ -145,9 +149,9 @@ class ActorNetwork(nn.Module):
         '''
         self.embedding = nn.Embedding(
             num_embeddings = 87429,
-            embedding_dim = 51, 
+            embedding_dim = 51) 
             #padding_idx = 50, 
-            max_norm = 1)
+            #max_norm = 1)
         self.conv2d_0 = nn.Conv2d(
             in_channels = self.num_channels,
             out_channels = 1,
@@ -189,7 +193,7 @@ class ActorNetwork(nn.Module):
 
 
     def forward(self, input):
-        print("\n---INPUT---\n")
+        #print("\n---INPUT---\n")
         embedding_output = self.embedding(input)
         
         conv2d_0_output = self.conv2d_0(embedding_output)
@@ -209,8 +213,8 @@ class ActorNetwork(nn.Module):
         max_3_output = torch.max(conv2d_3_output)
         max_4_output = torch.max(conv2d_4_output)
 
-        print(max_0_output)
-        print(max_0_output.shape)
+        #print(max_0_output)
+        #print(max_0_output.shape)
 
         linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
 
@@ -231,6 +235,8 @@ class ActorNetwork(nn.Module):
     '''
 
     def save_checkpoint(self):
+        try: os.makedirs(self.checkpoint_dir)
+        except FileExistsError: print("Directory " , self.checkpoint_dir ,  " already exists")
         torch.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
@@ -239,11 +245,12 @@ class ActorNetwork(nn.Module):
 
 
 class CriticNetwork(nn.Module):
-    #def __init__(self, input_dims, alpha, checkpoint_dir='tmp/ppo'):
-    def __init__(self, alpha, checkpoint_dir='tmp/ppo'):
+    #def __init__(self, input_dims, alpha, checkpoint_dir='temp/ppo'):
+    def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
         super(CriticNetwork, self).__init__()
 
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo')
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo.pth')
         '''
         self.critic = nn.Sequential(
                 nn.Linear(*input_dims, 256),
@@ -265,9 +272,9 @@ class CriticNetwork(nn.Module):
 
         self.embedding = nn.Embedding(
             num_embeddings = 87429,
-            embedding_dim = 51, 
+            embedding_dim = 51)
             #padding_idx = 50, 
-            max_norm = 1)
+            #max_norm = 1)
         self.conv2d_0 = nn.Conv2d(
             in_channels = self.num_channels,
             out_channels = 1,
@@ -293,7 +300,7 @@ class CriticNetwork(nn.Module):
             #stride = 1)
         self.linear = nn.Linear(
             in_features = 5,
-            out_features = 8)
+            out_features = 1)
 
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -336,6 +343,8 @@ class CriticNetwork(nn.Module):
     '''
 
     def save_checkpoint(self):
+        try: os.makedirs(self.checkpoint_dir)
+        except FileExistsError: print("Directory " , self.checkpoint_dir ,  " already exists")
         torch.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
@@ -420,11 +429,17 @@ class Agent:
 
             values = torch.tensor(values).to(self.actor.device)
             for batch in batches:
-                states = torch.tensor(state_arr[batch], dtype=torch.float).to(self.actor.device)
+                states = torch.tensor(state_arr[batch], dtype=torch.int64).to(self.actor.device)
+                print(state_arr)
+                print(batch)
+                print(state_arr[batch])
+                #states = torch.tensor(state_arr[batch], dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_prob_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)
 
                 dist = self.actor(states)
+                dist = Categorical(dist)
+                
                 critic_value = self.critic(states)
 
                 critic_value = torch.squeeze(critic_value)

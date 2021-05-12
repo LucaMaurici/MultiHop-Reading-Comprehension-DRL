@@ -46,9 +46,7 @@ def encodeState(state, encoder):
 def padState(state):
     MAX_LEN = 50
     newState = list()
-    print(newState)
     for i, e in enumerate(state):
-        print(e)
         trueLen = len(e)
         if trueLen > 50:
             newState.append(e[:50])
@@ -56,22 +54,21 @@ def padState(state):
             for i in range (50 - trueLen):
                 e.append(0)
             newState.append(e)
-            print(newState)
-    print(newState)
     return newState
 
 def encodeState(state, encoder):
-    print(state)
     encodedState = list()
     for i, e in enumerate(state):
         if i==0:
             encodedState.append(encoder.encode(e).tolist())
         elif i==1:
             num = 0
+            if len(e) > 8:  # truncate actions if num_actions > 8
+                e = e[0:8]
             for sentence in e:
                 encodedState.append(encoder.encode(sentence).tolist())
                 num +=1
-            for j in range(8-num):
+            for j in range(8-num):  # pad if num_actions < 8
                 encodedState.append(list())
         elif i==2:
             num = 0
@@ -80,8 +77,8 @@ def encodeState(state, encoder):
                 num +=1
             for j in range(30-num):
                 encodedState.append(list())
-    print("\n---Numpy---")
-    print(encodedState)
+    #print("\n---Numpy---")
+    #print(encodedState)
     encodedState = padState(encodedState)
     return encodedState
 
@@ -139,7 +136,7 @@ class MultiHopEnvironment:
         #self.done = False
 
         output = encodeState(self.state, self.encoder)
-        print("\n---STATE DOPO RESET---")
+        #print("\n---STATE DOPO RESET---")
         #print(output)
         return output
 
