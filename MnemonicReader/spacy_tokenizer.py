@@ -148,9 +148,11 @@ class SpacyTokenizer(object):
             annotators: set that can include pos, lemma, and ner.
             model: spaCy model to use (either path, or keyword like 'en').
         """
-        model = kwargs.get('model', 'en')
+        #model = kwargs.get('model', 'en')
         self.annotators = copy.deepcopy(kwargs.get('annotators', set()))
-        self.nlp = spacy.load(model)
+        #self.nlp = spacy.load(model)
+        self.nlp = spacy.load("en_core_web_sm")
+        
         self.nlp.remove_pipe('parser')
         if not any([p in self.annotators for p in ['lemma', 'pos', 'ner']]):
             self.nlp.remove_pipe('tagger')

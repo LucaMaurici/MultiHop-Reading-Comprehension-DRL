@@ -6,6 +6,8 @@
 # LICENSE file in the root directory of this source tree.
 """Machine Comprehension predictor"""
 
+import time
+
 import logging
 
 from multiprocessing import Pool as ProcessPool
@@ -93,6 +95,8 @@ class Predictor(object):
 
     def predict(self, document, question, candidates=None, top_n=1):
         """Predict a single document - question pair."""
+        print("STAMPA 1")
+        time.sleep(1)
         results = self.predict_batch([(document, question, candidates,)], top_n)
         return results[0]
 
@@ -104,6 +108,10 @@ class Predictor(object):
             questions.append(b[1])
             candidates.append(b[2] if len(b) == 3 else None)
         candidates = candidates if any(candidates) else None
+
+        
+        print("STAMPA 2")
+        time.sleep(1)
 
         # Tokenize the inputs, perhaps multi-processed.
         if self.workers:

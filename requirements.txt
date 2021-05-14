@@ -5,3 +5,7 @@ pytorch-nlp
 
 stanza
 matplotlib
+
+non mi ricordo
+spacy
+python -m spacy download en_core_web_sm
