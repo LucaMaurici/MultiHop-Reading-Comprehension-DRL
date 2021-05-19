@@ -19,7 +19,7 @@ import torch
     #import json
 
 #from tqdm import tqdm
-from predictor import Predictor
+import predictor
 from multiprocessing import cpu_count, freeze_support
 '''
 logger = logging.getLogger()
@@ -133,8 +133,8 @@ with open(outfile, 'w') as f:
 
 logger.info('Total time: %.2f' % (time.time() - t0))
 '''
-if __name__ == '__main__':
-    freeze_support()
+#if __name__ == '__main__':
+    #freeze_support()
     #pred = myPredict("Samuel drinks olive oil for 60 euros. Samuel is a good boy. Lucas is a good boy. Good boys drinks oil.", "drink olive oil")
-    pred = myPredict("Samuel is a good boy and Lucas too. A good boy drinks oil.", "drink oil")
-    print(pred)
+#pred = myPredict("Samuel is a good boy and Lucas too. A good boy drinks oil.", "drink oil")
+#print(pred)
