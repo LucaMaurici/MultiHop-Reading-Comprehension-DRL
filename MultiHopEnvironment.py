@@ -121,10 +121,10 @@ class MultiHopEnvironment:
         self.answer = sample['answer']
 
 
-        print("\n--- Adjacent nodes do the first one: ---\n")
+        #print("\n--- Adjacent nodes do the first one: ---\n")
         self.graph.setCurrentNode('q')
-        print(self.graph.currentNode)
-        print(self.graph.getAdjacentNodes())
+        #print(self.graph.currentNode)
+        #print(self.graph.getAdjacentNodes())
 
         
         self.actions = self.graph.getAdjacentNodes()
