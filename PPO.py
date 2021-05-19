@@ -34,9 +34,9 @@ class PPOMemory:
                 batches
 
     def store_memory(self, state, action, probs, vals, reward, done):
-        print("\n\n---STATE---")
+        #print("\n\n---STATE---")
         #state = [item for sublist in state for item in sublist]  # flatten the state from a list of lists into a list
-        print(state)
+        #print(state)
         self.states.append(state)
         self.actions.append(action)
         self.probs.append(probs)
@@ -62,7 +62,7 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_2.pth')
         
         #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
         
@@ -242,6 +242,9 @@ class ActorNetwork(nn.Module):
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
 
+    def load_checkpoint(self, checkpoint_file):
+        self.load_state_dict(torch.load(checkpoint_file))
+
 
 
 class CriticNetwork(nn.Module):
@@ -250,7 +253,7 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_2.pth')
         '''
         self.critic = nn.Sequential(
                 nn.Linear(*input_dims, 256),
@@ -332,7 +335,7 @@ class CriticNetwork(nn.Module):
         #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
         #maxpool1d_output = self.maxpool1d(maxpool1d_input)
         linear_output = self.linear(linear_input)
-        linear_output = f.relu_(linear_output)
+        #linear_output = f.relu_(linear_output)
         
         return linear_output
     #------------------------------------------------------------
@@ -349,6 +352,9 @@ class CriticNetwork(nn.Module):
 
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
+
+    def load_checkpoint(self, checkpoint_file):
+        self.load_state_dict(torch.load(checkpoint_file))
 
 class Agent:
     #def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
@@ -382,29 +388,34 @@ class Agent:
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
+    def load_models(self, checkpoint_file):
+        print('... loading models ...')
+        self.actor.load_checkpoint("actor_"+checkpoint_file)
+        self.critic.load_checkpoint("critic_"+checkpoint_file)
+
     def choose_action(self, observation):
-        print("\n---OBSERVATION---")
+        #print("\n---OBSERVATION---")
         #observation = observation.astype('int64')
         #print(np.array(observation))
         state = torch.tensor(observation).to(self.actor.device).long()
         #state = state.unsqueeze_(0)
         #state = state.permute(0,3,1,2)
-        print("\n---SHAPE---")
-        print(np.shape(state))
+        #print("\n---SHAPE---")
+        #print(np.shape(state))
 
         dist = self.actor(state.unsqueeze(0))
         value = self.critic(state.unsqueeze(0))
-        print(dist)
+        #print(dist)
         dist = Categorical(dist)
         
         action = dist.sample()
 
         probs = torch.squeeze(dist.log_prob(action)).item()
-        print(probs)
+        #print(probs)
         action = torch.squeeze(action).item()
-        print(action)
+        #print(action)
         value = torch.squeeze(value).item()
-        print(value)
+        #print(value)
 
         return action, probs, value
 
@@ -414,7 +425,11 @@ class Agent:
             reward_arr, dones_arr, batches = \
                     self.memory.generate_batches()
 
+            #print(self.memory.generate_batches())
+
             values = vals_arr
+            #print(action_arr)
+            #print(values)
             advantage = np.zeros(len(reward_arr), dtype=np.float32)
 
             for t in range(len(reward_arr)-1):
@@ -430,9 +445,9 @@ class Agent:
             values = torch.tensor(values).to(self.actor.device)
             for batch in batches:
                 states = torch.tensor(state_arr[batch], dtype=torch.int64).to(self.actor.device)
-                print(state_arr)
-                print(batch)
-                print(state_arr[batch])
+                #print(state_arr)
+                #print(batch)
+                #print(state_arr[batch])
                 #states = torch.tensor(state_arr[batch], dtype=torch.float).to(self.actor.device)
                 old_probs = torch.tensor(old_prob_arr[batch]).to(self.actor.device)
                 actions = torch.tensor(action_arr[batch]).to(self.actor.device)
@@ -441,6 +456,7 @@ class Agent:
                 dist = Categorical(dist)
                 
                 critic_value = self.critic(states)
+                #print(critic_value.item())
 
                 critic_value = torch.squeeze(critic_value)
 
@@ -453,6 +469,9 @@ class Agent:
                 actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
 
                 returns = advantage[batch] + values[batch]
+                #print(advantage[batch])
+                #print(values[batch])
+                #print(returns)
                 critic_loss = (returns-critic_value)**2
                 critic_loss = critic_loss.mean()
 
@@ -462,6 +481,11 @@ class Agent:
                 total_loss.backward()
                 self.actor.optimizer.step()
                 self.critic.optimizer.step()
+
+        print("\n---LOSSES---")
+        print(f"actor: {actor_loss}")
+        print(f"critic/2: {critic_loss*0.5}")
+        print(f"total: {total_loss}")
 
         self.memory.clear_memory()
 
