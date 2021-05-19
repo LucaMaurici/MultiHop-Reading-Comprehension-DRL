@@ -38,7 +38,9 @@ def keepMeaningfulWords(questOrAns):
     nlp = StanfordCoreNLP(annotators=annotators)
     #print("\n✪✪✪ SHARE WORDS: ✪✪✪\n")
     questOrAns = questOrAns.lower()
-    for token in nlp(questOrAns)[0]:
+    questOrAnsU = questOrAns.encode('utf-8')
+    
+    for token in nlp(questOrAnsU)[0]:
         #print(token, '->', token.pos)
         #print(token, '->', token.lemma)
         if token.pos == 'IN' or token.pos=='CC' or token.pos=='DT' or token.pos=='PRP' or token.pos=='PRP$' or token.pos=='TO' \
