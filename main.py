@@ -1,6 +1,6 @@
 import numpy as np
 from PPO import Agent
-from utils import plot_learning_curve, plot_learning_curve_average
+from my_utils import plot_learning_curve, plot_learning_curve_average
 from MultiHopEnvironment import MultiHopEnvironment
 import dill
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     for idx_episodes in range(1, n_episodes+1):
         print(f"\n---EPISODE {idx_episodes} ---")
-        observationOld = env.reset()
+        observationOld, _, _ = env.reset()
         #print(observationOld)
         done = False
         score = 0
@@ -42,7 +42,7 @@ if __name__ == '__main__':
             action, prob, val = agent.choose_action(observationOld)
             #print(f"---STEP: {idx_steps} ---")
             #print("STAMPA 1")
-            observationNew, reward, done = env.step(action)
+            observationNew, reward, done, _ = env.step(action)
             score += reward
             agent.remember(observationOld, action, prob, val, reward, done)
             #print("STAMPA 2")

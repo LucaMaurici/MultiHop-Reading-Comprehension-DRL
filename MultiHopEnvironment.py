@@ -77,10 +77,33 @@ def encodeState(state, encoder):
                 num +=1
             for j in range(30-num):
                 encodedState.append(list())
+
     #print("\n---Numpy---")
-    #print(encodedState)
+    #print(type(encodedState[0][0]))
     encodedState = padState(encodedState)
     return encodedState
+
+# TODO
+def unpad_state(state):
+    return state
+
+def decode_state(state, encoder):
+    decoded_state = list()
+    actions = list()
+    history = list()
+    for i, e in enumerate(state):
+        if i==0:
+            question = encoder.decode(e)
+            decoded_state.append(question)
+        elif i>=1 and i<=8:
+            actions.append(encoder.decode(e))
+        elif i>=9 <=38:
+            history.append(encoder.decode(e))
+    decoded_state.append(actions)
+    decoded_state.append(history)
+    decoded_state = unpad_state(decoded_state)
+    return decoded_state
+
 
 class MultiHopEnvironment:
 
@@ -94,7 +117,7 @@ class MultiHopEnvironment:
 
         with open('StaticTokenizerEncoder.pkl', 'rb') as f:
             self.encoder = dill.load(f)
-        print('Encoder opened')
+        #print('Encoder opened')
         
 
     def reset(self):
@@ -135,10 +158,10 @@ class MultiHopEnvironment:
         self.state.append(list()) #  state[2] = sentences representing the history of my hopes, initially empty
         #self.done = False
 
-        output = encodeState(self.state, self.encoder)
+        encoded_state = encodeState(self.state, self.encoder)
         #print("\n---STATE DOPO RESET---")
         #print(output)
-        return output
+        return encoded_state, self.state, self.answer
 
 
     def step(self, actionIndex):
@@ -149,7 +172,7 @@ class MultiHopEnvironment:
             self.graph.goTo(self.actions[actionIndex])
         else:
             reward = -0.1
-            return self.state, reward, done
+            return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
             done = True
@@ -161,7 +184,7 @@ class MultiHopEnvironment:
             self.state[1].append(self.id2sentence[actionID])
         self.state[2].append(self.id2sentence[self.graph.currentNode])
 
-        return np.array(encodeState(self.state, self.encoder), dtype=object), reward, done
+        return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
 
 #  state[0] = query

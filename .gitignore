@@ -194,3 +194,10 @@ corenlp_server-f80e622c1f454433.props
 corenlp_server-32785b5bf3484436.props
 corenlp_server-d1311d20546b4e1e.props
 corenlp_server-d6e0e10face9449e.props
+
+*.pyc
+*.DS_Store
+*~
+data/
+*.tar.gz
+*.egg-info

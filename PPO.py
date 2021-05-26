@@ -242,7 +242,7 @@ class ActorNetwork(nn.Module):
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
 
-    def load_checkpoint(self, checkpoint_file):
+    def load_checkpoint_path(self, checkpoint_file):
         self.load_state_dict(torch.load(checkpoint_file))
 
 
@@ -353,7 +353,7 @@ class CriticNetwork(nn.Module):
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.checkpoint_file))
 
-    def load_checkpoint(self, checkpoint_file):
+    def load_checkpoint_path(self, checkpoint_file):
         self.load_state_dict(torch.load(checkpoint_file))
 
 class Agent:
@@ -388,10 +388,10 @@ class Agent:
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
-    def load_models(self, checkpoint_file):
+    def load_models_path(self, checkpoint_file):
         print('... loading models ...')
-        self.actor.load_checkpoint("actor_"+checkpoint_file)
-        self.critic.load_checkpoint("critic_"+checkpoint_file)
+        self.actor.load_checkpoint_path("actor_"+checkpoint_file)
+        self.critic.load_checkpoint_path("critic_"+checkpoint_file)
 
     def choose_action(self, observation):
         #print("\n---OBSERVATION---")
