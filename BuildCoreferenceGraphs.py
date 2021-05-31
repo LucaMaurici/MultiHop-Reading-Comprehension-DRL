@@ -44,10 +44,12 @@ for i in range(N_GRAPHS):
         for node in graph.getNodes():
             if node != 'q':
                 sentence = id2sentence[node]
-                if cg.shareAllWordsOfFirst(sample['query'], sentence):
+                if cg.shareAllWordsOfFirst(sample['answer'], sentence):
                     answer_positions.append(node)
+                print(f"answer_positions: {answer_positions}")
         if len(answer_positions) == 0:
             continue
+
 
     elem = {'id':sampleId, 'graph':graph, 'id2sentence':id2sentence, 'answer_positions':answer_positions}
     graphs_list.append(elem)
