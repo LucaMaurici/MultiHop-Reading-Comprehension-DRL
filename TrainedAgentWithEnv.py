@@ -4,6 +4,7 @@ from MultiHopEnvironment import MultiHopEnvironment, decode_state
 from PPO import Agent
 import warnings
 import utils
+import random
 warnings.filterwarnings("ignore")
 
 env = MultiHopEnvironment()
@@ -12,7 +13,7 @@ n_steps = 30
 agent = Agent(batch_size=1, alpha=0.003, n_epochs=1)
 agent.load_models()
 
-n_samples = 100
+n_samples = 1000
 em_score_tot = 0
 
 for i in range(n_samples):
@@ -21,12 +22,14 @@ for i in range(n_samples):
     score = 0
     idx_steps = 0
 
-    while not done and idx_steps < n_steps:
+    #while not done and idx_steps < n_steps:
     #while idx_steps < n_steps:
-        action, prob, val = agent.choose_action(observationOld)
+    while idx_steps < n_steps:
+        #action, prob, val = agent.choose_action(observationOld)
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
-        observationNew, reward, done, raw_new_state = env.step(action)
+        #observationNew, reward, done, raw_new_state = env.step(action)
+        observationNew, reward, done, raw_new_state = env.step(random.randint(0, 8))
         idx_steps += 1
         score += reward
 
@@ -37,11 +40,14 @@ for i in range(n_samples):
 
     question = raw_new_state[0]
     print(f"\nQuestion: {question}")
-    
+
     text_to_read = "".join(raw_new_state[2])
     print(f"\nText to read: {text_to_read}")
 
-    prediction = myPredictor.myPredict(text_to_read, question)
+    if text_to_read != "":
+        prediction = myPredictor.myPredict(text_to_read, question)
+    else:
+        prediction = [("", 1.0)]
     
     print(f"\nPrediction: {prediction}")
     print(f"Correct answer: {answer}")
