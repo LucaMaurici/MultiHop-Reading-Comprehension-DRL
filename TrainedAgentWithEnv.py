@@ -12,7 +12,8 @@ n_steps = 30
 agent = Agent(batch_size=1, alpha=0.003, n_epochs=1)
 agent.load_models()
 
-n_samples = 10
+n_samples = 100
+em_score_tot = 0
 
 for i in range(n_samples):
     observationOld, raw_old_state, answer = env.reset()
@@ -35,15 +36,17 @@ for i in range(n_samples):
     print(f"Done: {done}")
 
     question = raw_new_state[0]
+    print(f"\nQuestion: {question}")
+    
     text_to_read = "".join(raw_new_state[2])
     print(f"\nText to read: {text_to_read}")
 
     prediction = myPredictor.myPredict(text_to_read, question)
-    print(f"\nQuestion: {question}")
+    
     print(f"\nPrediction: {prediction}")
     print(f"Correct answer: {answer}")
 
-    em_score_sample = int(utils.exact_match_score(prediction, answer))
+    em_score_sample = int(utils.exact_match_score(prediction[0][0], answer))
     print(f"EM Score Sample: {em_score_sample}")
 
     em_score_tot += em_score_sample

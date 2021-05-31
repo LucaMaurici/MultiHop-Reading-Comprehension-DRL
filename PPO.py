@@ -323,7 +323,7 @@ class CriticNetwork(nn.Module):
         conv2d_3_output = f.relu_(conv2d_3_output)
         conv2d_4_output = self.conv2d_4(embedding_output)
         conv2d_4_output = f.relu_(conv2d_4_output)
-        print(np.shape(conv2d_4_output))
+        #print(np.shape(conv2d_4_output))
 
         max_0_output = torch.max(conv2d_0_output)
         max_1_output = torch.max(conv2d_1_output)
