@@ -410,7 +410,7 @@ class Agent:
 
         dist = self.actor(state.unsqueeze(0))
         value = self.critic(state.unsqueeze(0))
-        #print(dist)
+        #print(f"Action distribution: {dist}")
         dist = Categorical(dist)
         
         action = dist.sample()

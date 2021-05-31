@@ -3,20 +3,24 @@ import CoreferenceGraph as cg
 import json
 import random
 
-N_GRAPHS = 960
+N_GRAPHS = 10
+TRAIN_MODE = True
+file_name = 'CoreferenceGraphsListTrain.pkl'
 
 with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
     dataset = json.load(read_file)
 read_file.close()
 
 try:
-    with open('CoreferenceGraphsList.pkl', 'rb') as f:
+    with open(file_name, 'rb') as f:
         graphs_list = pickle.load(f)
     f.close()
 except:
     graphs_list = list()
 
 for i in range(N_GRAPHS):
+
+    print(f"--- SAMPLE {i} ---")
 
     sample = dataset[random.randint(0, len(dataset)-1)]
     sampleId = sample['id']
@@ -32,14 +36,29 @@ for i in range(N_GRAPHS):
     #print("\n--- Graph: ---\n")
     #print(graph.getEdges())
 
-    elem = {'id':sampleId, 'graph':graph, 'id2sentence':id2sentence}
+    if TRAIN_MODE:
+        answer_positions = list()
+        print(f"sampleId: {sampleId}")
+        print(f"Number of nodes: {len(graph.getNodes())}")
+
+        for node in graph.getNodes():
+            if node != 'q':
+                sentence = id2sentence[node]
+                if cg.shareAllWordsOfFirst(sample['query'], sentence):
+                    answer_positions.append(node)
+        if len(answer_positions) == 0:
+            continue
+
+    elem = {'id':sampleId, 'graph':graph, 'id2sentence':id2sentence, 'answer_positions':answer_positions}
     graphs_list.append(elem)
 
-    with open('CoreferenceGraphsList.pkl', 'wb') as f:
+    print(f"{len(graphs_list)}/{N_GRAPHS}")
+
+    with open(file_name, 'wb') as f:
         pickle.dump(graphs_list, f)
     f.close()
 
-with open('CoreferenceGraphsList.pkl', 'rb') as f:
+with open(file_name, 'rb') as f:
     graphs_list = list(pickle.load(f))
     print(graphs_list)
 f.close()
