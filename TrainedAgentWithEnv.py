@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 env = MultiHopEnvironment()
 
 n_steps = 30
-agent = Agent(batch_size=1, alpha=0.003, n_epochs=1)
+agent = Agent(batch_size = 1, alpha = 0.003, n_epochs = 1)
 agent.load_models()
 
 n_samples = 1000
@@ -53,12 +53,12 @@ for i in range(n_samples):
     print(f"Correct answer: {answer}")
 
     em_score_sample = int(utils.exact_match_score(prediction[0][0], answer))
-    print(f"EM Score Sample: {em_score_sample}")
+    print(f"EM Score - Sample: {em_score_sample}")
 
     em_score_tot += em_score_sample
     print("------------------------------------------------------------------------\n\n")
 
-print(f"EM Score Final: {em_score_tot/n_samples}")
+print(f"EM Score - Final: {em_score_tot/n_samples}")
 
 
 

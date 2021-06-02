@@ -11,7 +11,7 @@ def indexer(docNumber, sentenceIndex):
 def getRadixNode(node):
     dPos = node.index('s')
     docNumber = node[1:dPos]
-    print(indexer(docNumber, 0))
+    print(f"Indexer: {indexer(docNumber, 0)}")
     return indexer(docNumber, 0)
 
 def shareEntities(list1, list2):

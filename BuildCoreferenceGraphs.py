@@ -6,8 +6,14 @@ import random
 N_GRAPHS = 10
 TRAIN_MODE = True
 file_name = 'CoreferenceGraphsListTrain.pkl'
+#---Train---
+dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
+#dataset_path = "E:/Datasets/Wikihop/train.json"
+#---Test---
+#dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+#dataset_path = "E:/Datasets/Wikihop/dev.json"
 
-with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
+with open(dataset_path, "r") as read_file:
     dataset = json.load(read_file)
 read_file.close()
 

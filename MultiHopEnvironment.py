@@ -107,12 +107,21 @@ def decode_state(state, encoder):
 
 class MultiHopEnvironment:
 
-    def __init__(self):
+    def __init__(self, train_check = False):
+        if(train_check):
+            dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
+            #dataset_path = "E:/Datasets/Wikihop/train.json"
+            graph_path = "CoreferenceGraphsList_train.pkl"
+        else:
+            dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+            #dataset_path = "E:/Datasets/Wikihop/dev.json"
+            graph_path = "CoreferenceGraphsList_dev.pkl"
+
         #with open("./Dataset/train.json", "r") as read_file:
-        with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
+        with open(dataset_path,"r") as read_file:
             self.dataset = json.load(read_file)
         #self.reset()
-        with open('CoreferenceGraphsList.pkl', 'rb') as f:
+        with open(graph_path, 'rb') as f:
             self.graphs_list = pickle.load(f)
 
         with open('StaticTokenizerEncoder.pkl', 'rb') as f:
