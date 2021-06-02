@@ -201,3 +201,6 @@ corenlp_server-d6e0e10face9449e.props
 data/
 *.tar.gz
 *.egg-info
+dataset/Wikihop/train.json
+dataset/Wikihop.zip
+dataset/Wikihop/dev.json
