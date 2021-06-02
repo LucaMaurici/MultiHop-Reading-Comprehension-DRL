@@ -5,20 +5,25 @@ import random
 
 N_GRAPHS = 10
 TRAIN_MODE = True
-file_name = 'CoreferenceGraphsListTrain.pkl'
-#---Train---
-dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
-#dataset_path = "E:/Datasets/Wikihop/train.json"
-#---Test---
-#dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
-#dataset_path = "E:/Datasets/Wikihop/dev.json"
+
+#--- Train ---
+if TRAIN_MODE:
+    graph_path = 'CoreferenceGraphsList_train.pkl'
+    dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
+    #dataset_path = "E:/Datasets/Wikihop/train.json"
+
+#--- Test ---
+else:
+    graph_path = 'CoreferenceGraphsList_dev.pkl'
+    dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+    #dataset_path = "E:/Datasets/Wikihop/dev.json"
 
 with open(dataset_path, "r") as read_file:
     dataset = json.load(read_file)
 read_file.close()
 
 try:
-    with open(file_name, 'rb') as f:
+    with open(graph_path, 'rb') as f:
         graphs_list = pickle.load(f)
     f.close()
 except:
@@ -35,24 +40,24 @@ for i in range(N_GRAPHS):
     try:
         graph, id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
     except:
-        print("\n!!! ERROR in building a graph !!!\n")
+        print("\n!!! ERROR in Building This Graph !!!\n")
         continue
     
     #graph, id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
     #print("\n--- Graph: ---\n")
     #print(graph.getEdges())
 
-    if TRAIN_MODE:
-        answer_positions = list()
-        print(f"sampleId: {sampleId}")
-        print(f"Number of nodes: {len(graph.getNodes())}")
+    answer_positions = list()
+    print(f"sampleId: {sampleId}")
+    print(f"Number of nodes: {len(graph.getNodes())}")
 
-        for node in graph.getNodes():
-            if node != 'q':
-                sentence = id2sentence[node]
-                if cg.shareAllWordsOfFirst(sample['answer'], sentence):
-                    answer_positions.append(node)
-                print(f"answer_positions: {answer_positions}")
+    for node in graph.getNodes():
+        if node != 'q':
+            sentence = id2sentence[node]
+            if cg.shareAllWordsOfFirst(sample['answer'], sentence):
+                answer_positions.append(node)
+            print(f"answer_positions: {answer_positions}")
+    if TRAIN_MODE:
         if len(answer_positions) == 0:
             continue
 
@@ -62,11 +67,11 @@ for i in range(N_GRAPHS):
 
     print(f"{len(graphs_list)}/{N_GRAPHS}")
 
-    with open(file_name, 'wb') as f:
+    with open(graph_path, 'wb') as f:
         pickle.dump(graphs_list, f)
     f.close()
 
-with open(file_name, 'rb') as f:
+with open(graph_path, 'rb') as f:
     graphs_list = list(pickle.load(f))
     print(graphs_list)
 f.close()
