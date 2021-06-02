@@ -178,7 +178,7 @@ class MultiHopEnvironment:
         encoded_state = encodeState(self.state, self.encoder)
         #print("\n---STATE DOPO RESET---")
         #print(output)
-        return encoded_state, self.state, self.answer
+        return encoded_state, self.state, self.answer, sample['candidates']
 
 
     def step(self, actionIndex):

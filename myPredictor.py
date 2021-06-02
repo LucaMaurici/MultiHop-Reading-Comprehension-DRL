@@ -15,7 +15,7 @@ predictor = Predictor(
     num_workers=-1,
 )
 
-def myPredict(document, question, candidates=None, top_n=3):
+def myPredict(document, question, candidates=None, top_n=1):
     """Predict a single document - question pair."""
     result = predictor.predict(document, question, candidates, top_n)
     return result

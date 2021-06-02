@@ -11,7 +11,6 @@ TRAIN_MODE = False
 if TRAIN_MODE:
     graph_path = paths.graph_path_train
     dataset_path = paths.dataset_path_train
-
 #--- Dev ---
 else:
     graph_path = paths.graph_path_dev

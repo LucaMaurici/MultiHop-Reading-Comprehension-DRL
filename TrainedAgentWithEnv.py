@@ -6,18 +6,26 @@ import warnings
 import utils
 import random
 warnings.filterwarnings("ignore")
+import paths
+import pickle
 
 env = MultiHopEnvironment(train_mode=False)
+
+
+with open(paths.graph_path_dev, 'rb') as f:
+    graphs_list = pickle.load(f)
+n_samples = len(graphs_list)
+
 
 n_steps = 30
 agent = Agent(batch_size = 1, alpha = 0.003, n_epochs = 1)
 agent.load_models()
 
-n_samples = 9
+#n_samples = 9
 em_score_tot = 0
 
 for i in range(n_samples):
-    observationOld, raw_old_state, answer = env.reset()
+    observationOld, raw_old_state, answer, candidates = env.reset()
     done = False
     score = 0
     idx_steps = 0
@@ -44,15 +52,23 @@ for i in range(n_samples):
     text_to_read = "".join(raw_new_state[2])
     print(f"\nText to read: {text_to_read}")
 
+    #candidates
+    #sample = getSampleById(dataset, sampleId)
+    print(candidates)
+
     if text_to_read != "":
-        prediction = myPredictor.myPredict(text_to_read, question)
+        prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
     else:
         prediction = [("", 1.0)]
     
     print(f"\nPrediction: {prediction}")
     print(f"Correct answer: {answer}")
 
-    em_score_sample = int(utils.exact_match_score(prediction[0][0], answer))
+    if len(prediction) > 0:
+        prediction = prediction[0][0]
+    else:
+        prediction = ""
+    em_score_sample = int(utils.exact_match_score(prediction, answer))
     print(f"EM Score - Sample: {em_score_sample*100}%")
 
     em_score_tot += em_score_sample
