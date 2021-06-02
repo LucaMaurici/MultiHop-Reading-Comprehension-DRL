@@ -204,3 +204,4 @@ data/
 dataset/Wikihop/train.json
 dataset/Wikihop.zip
 dataset/Wikihop/dev.json
+paths.py
