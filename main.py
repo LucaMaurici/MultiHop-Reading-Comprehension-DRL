@@ -5,7 +5,7 @@ from MultiHopEnvironment import MultiHopEnvironment
 import dill
 
 if __name__ == '__main__':
-    env = MultiHopEnvironment()
+    env = MultiHopEnvironment(train_mode=True)
     state = env.reset()
 
     encoder = None

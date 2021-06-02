@@ -107,14 +107,16 @@ def decode_state(state, encoder):
 
 class MultiHopEnvironment:
 
-    def __init__(self, train_check = False):
-        if(train_check):
-            dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
-            #dataset_path = "E:/Datasets/Wikihop/train.json"
+    def __init__(self, train_mode = False):
+        self.train_mode = train_mode
+        self.test_index = 0
+        if(train_mode):
+            #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
+            dataset_path = "E:/Datasets/Wikihop/train.json"
             graph_path = "CoreferenceGraphsList_train.pkl"
         else:
-            dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
-            #dataset_path = "E:/Datasets/Wikihop/dev.json"
+            #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+            dataset_path = "E:/Datasets/Wikihop/dev.json"
             graph_path = "CoreferenceGraphsList_dev.pkl"
 
         #with open("./Dataset/train.json", "r") as read_file:
@@ -139,8 +141,15 @@ class MultiHopEnvironment:
         print("\n--- Graph: ---\n")
         print(self.graph.getEdges())
         '''
-
-        graphSample = self.graphs_list[random.randint(0, len(self.graphs_list)-1)]
+        if self.train_mode == False:
+            if self.test_index < len(self.graphs_list):
+                graphSample = self.graphs_list[self.test_index]
+                self.test_index += 1
+            else:
+                print("\nDEV_DATASET FINISHED\n")
+                exit()
+        else:
+            graphSample = self.graphs_list[random.randint(0, len(self.graphs_list)-1)]
         self.sampleId = graphSample['id']
         self.graph = graphSample['graph']
         self.id2sentence = graphSample['id2sentence']

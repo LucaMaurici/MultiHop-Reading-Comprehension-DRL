@@ -4,19 +4,19 @@ import json
 import random
 
 N_GRAPHS = 10
-TRAIN_MODE = True
+TRAIN_MODE = False
 
 #--- Train ---
 if TRAIN_MODE:
     graph_path = 'CoreferenceGraphsList_train.pkl'
-    dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
-    #dataset_path = "E:/Datasets/Wikihop/train.json"
+    #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
+    dataset_path = "E:/Datasets/Wikihop/train.json"
 
 #--- Test ---
 else:
     graph_path = 'CoreferenceGraphsList_dev.pkl'
-    dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
-    #dataset_path = "E:/Datasets/Wikihop/dev.json"
+    #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+    dataset_path = "E:/Datasets/Wikihop/dev.json"
 
 with open(dataset_path, "r") as read_file:
     dataset = json.load(read_file)

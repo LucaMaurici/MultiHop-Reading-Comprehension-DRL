@@ -2,7 +2,7 @@ import pickle
 from MultiHopEnvironment import MultiHopEnvironment
 import random
 
-env = MultiHopEnvironment()
+env = MultiHopEnvironment(train_mode=False)
 
 print("\n--- State: ---\n")
 print(env.reset())
