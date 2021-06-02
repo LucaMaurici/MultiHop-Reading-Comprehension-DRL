@@ -6,6 +6,7 @@ import Graph_class as gs
 import dill
 from torchnlp.encoders.text import StaticTokenizerEncoder, stack_and_pad_tensors, pad_tensor
 import numpy as np
+import paths
 
 def getSampleById(dataset, id):
     for e in dataset:
@@ -111,13 +112,11 @@ class MultiHopEnvironment:
         self.train_mode = train_mode
         self.test_index = 0
         if(train_mode):
-            #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
-            dataset_path = "E:/Datasets/Wikihop/train.json"
-            graph_path = "CoreferenceGraphsList_train.pkl"
+            graph_path = paths.graph_path_train
+            dataset_path = paths.dataset_path_train
         else:
-            #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
-            dataset_path = "E:/Datasets/Wikihop/dev.json"
-            graph_path = "CoreferenceGraphsList_dev.pkl"
+            graph_path = paths.graph_path_dev
+            dataset_path = paths.dataset_path_dev
 
         #with open("./Dataset/train.json", "r") as read_file:
         with open(dataset_path,"r") as read_file:

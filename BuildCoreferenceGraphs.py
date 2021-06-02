@@ -2,21 +2,20 @@ import pickle
 import CoreferenceGraph as cg
 import json
 import random
+import paths
 
-N_GRAPHS = 10
+N_GRAPHS = 1
 TRAIN_MODE = False
 
 #--- Train ---
 if TRAIN_MODE:
-    graph_path = 'CoreferenceGraphsList_train.pkl'
-    #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"
-    dataset_path = "E:/Datasets/Wikihop/train.json"
+    graph_path = paths.graph_path_train
+    dataset_path = paths.dataset_path_train
 
-#--- Test ---
+#--- Dev ---
 else:
-    graph_path = 'CoreferenceGraphsList_dev.pkl'
-    #dataset_path = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
-    dataset_path = "E:/Datasets/Wikihop/dev.json"
+    graph_path = paths.graph_path_dev
+    dataset_path = paths.dataset_path_dev
 
 with open(dataset_path, "r") as read_file:
     dataset = json.load(read_file)
@@ -28,6 +27,8 @@ try:
     f.close()
 except:
     graphs_list = list()
+
+old_graphs_list_length = len(graphs_list)
 
 for i in range(N_GRAPHS):
 
@@ -65,7 +66,7 @@ for i in range(N_GRAPHS):
     elem = {'id':sampleId, 'graph':graph, 'id2sentence':id2sentence, 'answer_positions':answer_positions}
     graphs_list.append(elem)
 
-    print(f"{len(graphs_list)}/{N_GRAPHS}")
+    print(f"{len(graphs_list)}/{N_GRAPHS+old_graphs_list_length}")
 
     with open(graph_path, 'wb') as f:
         pickle.dump(graphs_list, f)
