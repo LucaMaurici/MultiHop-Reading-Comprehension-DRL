@@ -10,6 +10,7 @@ TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia l
 		- Cambiare entity linking nella costruzione del grafo
 		- Capire se si possano fornire i candidates al MnemonicReader
 		- Controllare e pensare a contemplare il caso in cui non si riesca a collegare la domanda a nessuna frase
+		- Cambiare il DONE nello step dell'environment
 
 		OBIETTIVO: 
 		Arrivare a 33% di accuracy con random walk (tenendo il resto uguale)

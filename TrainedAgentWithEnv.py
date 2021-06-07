@@ -31,7 +31,6 @@ for i in range(n_samples):
     idx_steps = 0
 
     #while not done and idx_steps < n_steps:
-    #while idx_steps < n_steps:
     while idx_steps < n_steps:
         #action, prob, val = agent.choose_action(observationOld)
         #print(f"---STEP: {idx_steps} ---")
