@@ -1,6 +1,7 @@
 import pickle
 import CoreferenceGraph as cg
-#import paths
+import math
+import matplotlib.pyplot as plt
 
 graph_path = "CoreferenceGraphsList_dev_uniqueAnswerFiltered.pkl"
 
@@ -24,6 +25,10 @@ total_number_of_nodes = 0
 num_walks_more_than_10_hops = 0
 num_walks_more_than_10_hops_with_unreachable_answers = 0
 
+MEAN_DEGREE = 5.38507214834757
+total_squared_deviation_degree = 0
+degree2occ = {}
+
 for i, elem in enumerate(graphs_list):
     print(f"\n--- SAMPLE {i} ---")
 
@@ -33,10 +38,19 @@ for i, elem in enumerate(graphs_list):
     id2sentence = elem["id2sentence"]
 
     nodes = graph.getNodes()
-    total_number_of_nodes += len(nodes)
+    nodes_len = len(nodes)
+    print(f"Numer of nodes: {nodes_len}")
+    total_number_of_nodes += nodes_len
     for node in nodes:
         graph.setCurrentNode(node)
-        total_degree += len(graph.getAdjacentNodes())
+        node_degree = len(graph.getAdjacentNodes())
+        total_degree += node_degree
+        #print(node_degree)
+        try:
+            degree2occ[node_degree] += 1
+        except:
+            degree2occ[node_degree] = 1
+        total_squared_deviation_degree += pow((node_degree - MEAN_DEGREE), 2)
 
     done = False
 
@@ -44,17 +58,21 @@ for i, elem in enumerate(graphs_list):
     markers = ['q']
 
     actions = graph.getAdjacentNodes()
+    num_to_visit = 0
+    num_iterations = 0
     to_visit = list()
     to_visit.append(1)
     to_visit += actions
-    
+    num_to_visit += len(actions)+1
 
-    for node in to_visit:
+    for j, node in enumerate(to_visit):
         if type(node) == int:
             hops_counter = node
             continue
         if node in markers:
             continue
+        num_iterations += 1
+        print(num_iterations)
 
         markers.append(node)
         graph.setCurrentNode(node)
@@ -66,7 +84,8 @@ for i, elem in enumerate(graphs_list):
         actions = graph.getAdjacentNodes()
         to_visit.append(hops_counter+1)
         to_visit += actions
-
+        num_to_visit += len(actions)+1
+    print(f"num_to_visit: {num_to_visit}")
 
     total_number_of_hops_with_unreachable_answers += hops_counter
 
@@ -93,12 +112,17 @@ print(f"\n\nAverage number of hops: {average_number_of_hops}")
 average_number_of_hops_unreachable_answers = total_number_of_hops_with_unreachable_answers/graphs_list_length
 print(f"Average number of hops including unreachable answers: {average_number_of_hops_unreachable_answers}")
 
-print(f"\nNumber of unreachable_answers: {unreachable_answers_counter}")
+#print(f"\nNumber of unreachable_answers: {unreachable_answers_counter}")
 print(f"\nPercentage of reachable answers: {100-(unreachable_answers_counter/graphs_list_length)*100} %")
 
-print(f"\nMean weighted degree: {total_degree/total_number_of_nodes}")
+print(f"\nMean degree: {total_degree/total_number_of_nodes}")
 
 print(f"\nPercentage of reachable answers in more than 10 hops: {(num_walks_more_than_10_hops/(graphs_list_length-unreachable_answers_counter))*100} %")
-print(f"\nPercentage of reachable answers in more than 10 hops: {(num_walks_more_than_10_hops_with_unreachable_answers/(graphs_list_length-unreachable_answers_counter))*100} %")
+print(f"\nPercentage of answers in more than 10 hops including unreachable answers: {(num_walks_more_than_10_hops_with_unreachable_answers/(graphs_list_length-unreachable_answers_counter))*100} %")
+
+print(f"\nDegree variance: {math.sqrt(total_squared_deviation_degree/(total_number_of_nodes-1))}")
+
+plt.bar(list(degree2occ.keys()), degree2occ.values(), color='g')
+plt.show()
 
 print()

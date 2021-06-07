@@ -1,5 +1,4 @@
 import pickle
-#import CoreferenceGraph as cg
 import paths
 
 TRAIN_MODE = False
