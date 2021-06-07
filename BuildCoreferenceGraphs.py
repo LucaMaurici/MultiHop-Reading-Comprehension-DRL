@@ -4,7 +4,7 @@ import json
 import random
 import paths
 
-N_GRAPHS = 1
+N_GRAPHS = 4000
 TRAIN_MODE = False
 
 #--- Train ---
@@ -56,7 +56,7 @@ for i in range(N_GRAPHS):
             sentence = id2sentence[node]
             if cg.shareAllWordsOfFirst(sample['answer'], sentence):
                 answer_positions.append(node)
-            print(f"answer_positions: {answer_positions}")
+    print(f"answer_positions: {answer_positions}")
     if TRAIN_MODE:
         if len(answer_positions) == 0:
             continue
