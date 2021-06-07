@@ -2,7 +2,7 @@
 
 FATTO: Controllare se, quando si costruisce lo stato, il numero di azioni venga effettivamente costretto a non essere > 8
 minore di 8 già funziona, nel senso che viene aggiunto il è padding in maniera funzionante.
- 
+
 TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia la risposta
 		- Cambiare architettura della rete
 		- Usare embeddings preallenati
@@ -26,3 +26,8 @@ TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia l
 
 		ALTRO POSSIBILE OBIETTIVO:
 		Non usare neanche il mnemonic reader usando come metrica quella in tabella 2, in cui misuriamo quante volte trovaimo una frase con la risposta usando o il grafo con RandomWalk o il grafo con la policy
+
+
+		RICERCA:
+		- Esplorare il grafo dando reward 1 per tutte le frasi che sono ritenute delle possibili contenitrici di risposte. Per una data frase dare reward 1 una sola volta e reward negativa (es: -0.2) per ogni volta che si ripassa due volte sulla stessa frase (forse anche per ogni generica frase). In questo modo cerchiamo di raccogliere tutte le frasi in cui presumiamo possa essere contenuta la risposta e non ci fermiamo alla prima che troviamo (che ptorebbe non contenerla), potremmo addirittura pensare di fermarci (done = True) solo quando siamo passati in tutte le frasi che potrebbero contenere la risposta.
+		- Valutare l'idea di allungare gli step consentiti prima di fermarsi (>30)
