@@ -108,19 +108,19 @@ for i, elem in enumerate(graphs_list):
             num_walks_more_than_10_hops += 1
 
 average_number_of_hops = total_number_of_hops/(graphs_list_length-unreachable_answers_counter)
-print(f"\n\nAverage number of hops: {average_number_of_hops}")
+print(f"\n\n\n Average number of hops: {average_number_of_hops}")
 average_number_of_hops_unreachable_answers = total_number_of_hops_with_unreachable_answers/graphs_list_length
-print(f"Average number of hops including unreachable answers: {average_number_of_hops_unreachable_answers}")
+print(f" Average number of hops including unreachable answers: {average_number_of_hops_unreachable_answers}")
 
 #print(f"\nNumber of unreachable_answers: {unreachable_answers_counter}")
-print(f"\nPercentage of reachable answers: {100-(unreachable_answers_counter/graphs_list_length)*100} %")
+print(f"\n Percentage of reachable answers: {100-(unreachable_answers_counter/graphs_list_length)*100} %")
 
-print(f"\nMean degree: {total_degree/total_number_of_nodes}")
+print(f"\n Mean degree: {total_degree/total_number_of_nodes}")
 
-print(f"\nPercentage of reachable answers in more than 10 hops: {(num_walks_more_than_10_hops/(graphs_list_length-unreachable_answers_counter))*100} %")
-print(f"\nPercentage of answers in more than 10 hops including unreachable answers: {(num_walks_more_than_10_hops_with_unreachable_answers/(graphs_list_length-unreachable_answers_counter))*100} %")
+print(f"\n Percentage of reachable answers in more than 10 hops: {(num_walks_more_than_10_hops/(graphs_list_length-unreachable_answers_counter))*100} %")
+print(f" Percentage of answers in more than 10 hops including unreachable answers: {(num_walks_more_than_10_hops_with_unreachable_answers/(graphs_list_length-unreachable_answers_counter))*100} %")
 
-print(f"\nDegree variance: {math.sqrt(total_squared_deviation_degree/(total_number_of_nodes-1))}")
+print(f"\n Degree variance: {math.sqrt(total_squared_deviation_degree/(total_number_of_nodes-1))}")
 
 plt.bar(list(degree2occ.keys()), degree2occ.values(), color='g')
 plt.show()
