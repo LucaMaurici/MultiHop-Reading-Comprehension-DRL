@@ -98,6 +98,7 @@ def buildCoreferenceGraph(question, documents):
     graph.addNode('q')
     id2sentence['q'] = question
 
+    num_documents = len(documents)
 
     for docNumber, text in enumerate(documents, start=0):
 
@@ -111,6 +112,10 @@ def buildCoreferenceGraph(question, documents):
             graph.addNode(indexer(docNumber, sentenceIndex))
             if sentenceIndex != 0:
                 graph.addEdge((indexer(docNumber, sentenceIndex-1), indexer(docNumber, sentenceIndex)))
+
+        #LINKING BETWEEN THE LAST SENTENCE OF A DOCUMENT AND THE FIRST SENTENCE OF THE FOLLOWING DOCUMENT
+        if docNumber != num_documents-1:
+            graph.addEdge((indexer(docNumber, sentenceIndex), indexer(docNumber+1, 0)))
 
         #print("\n--- id2sentence: ---\n")
         #print(id2sentence)
@@ -205,6 +210,8 @@ def buildCoreferenceGraph(question, documents):
             if i != j:
                 if shareEntities(id2entities[i], id2entities[j]):
                     graph.addEdge((i, getRadixNode(j)))
+
+
 
 
     #print("\n--- Id 2 entities: ---\n")
