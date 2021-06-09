@@ -39,7 +39,7 @@ for i, elem in enumerate(graphs_list):
 
     nodes = graph.getNodes()
     nodes_len = len(nodes)
-    print(f"Numer of nodes: {nodes_len}")
+    print(f"Number of nodes: {nodes_len}")
     total_number_of_nodes += nodes_len
     for node in nodes:
         graph.setCurrentNode(node)
@@ -58,21 +58,21 @@ for i, elem in enumerate(graphs_list):
     markers = ['q']
 
     actions = graph.getAdjacentNodes()
-    num_to_visit = 0
+    #num_to_visit = 0
     num_iterations = 0
     to_visit = list()
     to_visit.append(1)
     to_visit += actions
-    num_to_visit += len(actions)+1
+    #num_to_visit += len(actions)+1
 
     for j, node in enumerate(to_visit):
+        num_iterations += 1
         if type(node) == int:
             hops_counter = node
             continue
         if node in markers:
             continue
-        num_iterations += 1
-        print(num_iterations)
+        
 
         markers.append(node)
         graph.setCurrentNode(node)
@@ -84,9 +84,11 @@ for i, elem in enumerate(graphs_list):
         actions = graph.getAdjacentNodes()
         to_visit.append(hops_counter+1)
         to_visit += actions
-        num_to_visit += len(actions)+1
-    print(f"num_to_visit: {num_to_visit}")
-
+        #num_to_visit += len(actions)+1
+    #print(f"num_to_visit: {num_to_visit}")
+    print(f"len_to_visit: {len(to_visit)}")
+    print(f"len_markers: {len(markers)}")
+    print(f"len_markers_set: {len(set(markers))}")
     total_number_of_hops_with_unreachable_answers += hops_counter
 
     if hops_counter > 10:

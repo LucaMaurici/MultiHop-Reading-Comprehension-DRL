@@ -24,7 +24,7 @@ class Graph:
 
     # Add the node as a key
     def addNode(self, node):
-       if node not in self.node2Edges:
+        if node not in self.node2Edges:
             self.node2Edges[node] = []
 
     # Add the new edge
