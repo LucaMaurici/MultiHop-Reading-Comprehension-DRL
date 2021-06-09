@@ -3,7 +3,7 @@ import CoreferenceGraph as cg
 import math
 import matplotlib.pyplot as plt
 
-graph_path = "CoreferenceGraphsList_dev_uniqueAnswerFiltered.pkl"
+graph_path = "CoreferenceGraphsList_dev2_uniqueAnswerFiltered.pkl"
 
 try:
     with open(graph_path, 'rb') as f:

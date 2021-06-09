@@ -16,7 +16,7 @@ TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia l
 		Arrivare a 33% di accuracy con random walk (tenendo il resto uguale)
 
 		- Stimare media e varianza del grado del grafo
-		- Stimare quanto è lungo il cammino ottimo medio fino alla risposta (3,44%)
+		- Stimare quanto è lungo il cammino ottimo medio fino alla risposta (3,44)
 		- Stimare quante volte non si raggiunge in maniera ottima un nodo risposta con più di 10 hop (1,52%)
 
 		Se va tutto bene allora il problema è più probabile che sia nel mnemonic reader "use it as the base reader implementation"
@@ -32,3 +32,4 @@ TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia l
 		RICERCA:
 		- Esplorare il grafo dando reward 1 per tutte le frasi che sono ritenute delle possibili contenitrici di risposte. Per una data frase dare reward 1 una sola volta e reward negativa (es: -0.2) per ogni volta che si ripassa due volte sulla stessa frase (forse anche per ogni generica frase). In questo modo cerchiamo di raccogliere tutte le frasi in cui presumiamo possa essere contenuta la risposta e non ci fermiamo alla prima che troviamo (che ptorebbe non contenerla), potremmo addirittura pensare di fermarci (done = True) solo quando siamo passati in tutte le frasi che potrebbero contenere la risposta.
 		- Valutare l'idea di allungare gli step consentiti prima di fermarsi (>30)
+		- Dare in input alla rete anche gli id delle frasi al fine di estrarre possibili pattern (ad esempio ci sembra che le risposte capitino verso l'inizio dei documenti (in realtà dovremmo controllare quanto sono lunghi in media))

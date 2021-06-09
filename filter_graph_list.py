@@ -31,19 +31,23 @@ for i, elem in enumerate(graphs_list):
         if len(elem["answer_positions"]) != 1:
             #--- Train ---
             if TRAIN_MODE:
-                file_name = "CoreferenceGraphsList_train_uniqueAnswerFiltered.pkl"
+                #file_name = "CoreferenceGraphsList_train_uniqueAnswerFiltered.pkl"
+                file_name = paths.graph_path_train[0:-4] + "_uniqueAnswerFiltered.pkl"
             #--- Dev ---
             else:
-                file_name = "CoreferenceGraphsList_dev_uniqueAnswerFiltered.pkl"
+                #file_name = "CoreferenceGraphsList_dev_uniqueAnswerFiltered.pkl"
+                file_name = paths.graph_path_dev[0:-4] + "_uniqueAnswerFiltered.pkl"
             continue
     else:
         if len(elem[answer_positions]) == 0:
             #--- Train ---
             if TRAIN_MODE:
-                file_name = "CoreferenceGraphsList_train_multipleAnswersFiltered.pkl"
+                #file_name = "CoreferenceGraphsList_train_multipleAnswersFiltered.pkl"
+                file_name = paths.graph_path_train[0:-4] + "_multipleAnswersFiltered.pkl"
             #--- Dev ---
             else:
-                file_name = "CoreferenceGraphsList_dev_multipleAnswersFiltered.pkl"
+                #file_name = "CoreferenceGraphsList_dev_multipleAnswersFiltered.pkl"
+                file_name = paths.graph_path_dev[0:-4] + "_multipleAnswersFiltered.pkl"
             continue
 
     new_graph_list.append(elem)
