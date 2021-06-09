@@ -4,7 +4,7 @@ import json
 import random
 import paths
 
-N_GRAPHS = 30
+N_GRAPHS = 1
 TRAIN_MODE = False
 
 #--- Train ---
@@ -33,7 +33,8 @@ for i in range(N_GRAPHS):
 
     print(f"--- SAMPLE {i} ---")
 
-    sample = dataset[random.randint(0, len(dataset)-1)]
+    #sample = dataset[random.randint(0, len(dataset)-1)]
+    sample = dataset[1]
     sampleId = sample['id']
     
     
