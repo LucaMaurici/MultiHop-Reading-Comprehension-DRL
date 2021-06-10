@@ -11,6 +11,7 @@ TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia l
 		- Capire se si possano fornire i candidates al MnemonicReader
 		- Controllare e pensare a contemplare il caso in cui non si riesca a collegare la domanda a nessuna frase
 		- Cambiare il DONE nello step dell'environment
+		- Spostare la creazione dei link fra documenti consecutivi alla fine di tutto o comunque dopo la coreference resolution
 
 		OBIETTIVO: 
 		Arrivare a 33% di accuracy con random walk (tenendo il resto uguale)

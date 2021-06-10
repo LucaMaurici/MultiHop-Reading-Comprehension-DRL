@@ -7,7 +7,7 @@ import paths
 import json
 #import random
 
-graph_path = "CoreferenceGraphsList_dev2_uniqueAnswerFiltered.pkl"
+graph_path = "CoreferenceGraphsList_dev3_uniqueAnswerFiltered.pkl"
 
 try:
     with open(graph_path, 'rb') as f:

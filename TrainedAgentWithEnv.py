@@ -11,11 +11,15 @@ import pickle
 
 env = MultiHopEnvironment(train_mode=False)
 
-
+graph_path = "CoreferenceGraphsList_dev3_uniqueAnswerFiltered.pkl"
+'''
 with open(paths.graph_path_dev, 'rb') as f:
     graphs_list = pickle.load(f)
 n_samples = len(graphs_list)
-
+'''
+with open(graph_path, 'rb') as f:
+    graphs_list = pickle.load(f)
+n_samples = len(graphs_list)
 
 n_steps = 30
 agent = Agent(batch_size = 1, alpha = 0.003, n_epochs = 1)
