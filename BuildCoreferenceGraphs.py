@@ -4,8 +4,16 @@ import json
 import random
 import paths
 
-N_GRAPHS = 1
+N_GRAPHS = 20
 TRAIN_MODE = False
+
+
+def contains_sample(graphs_list, id_tocheck):
+    for elem in graphs_list:
+        if elem["id"] == id_tocheck:
+            return True
+    return False
+
 
 #--- Train ---
 if TRAIN_MODE:
@@ -33,10 +41,13 @@ for i in range(N_GRAPHS):
 
     print(f"--- SAMPLE {i} ---")
 
-    #sample = dataset[random.randint(0, len(dataset)-1)]
-    sample = dataset[1]
+    sample = dataset[random.randint(0, len(dataset)-1)]
     sampleId = sample['id']
-    
+
+    if contains_sample(graphs_list, sampleId):
+        print("DUPLICATE, skip")
+        i -= 1
+        continue
     
     try:
         graph, id2sentence = cg.buildCoreferenceGraph(sample['query'], sample['supports'])
