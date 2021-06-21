@@ -116,6 +116,7 @@ def buildCoreferenceGraph(question, documents):
         #LINKING BETWEEN THE LAST SENTENCE OF A DOCUMENT AND THE FIRST SENTENCE OF THE FOLLOWING DOCUMENT
         if docNumber != num_documents-1:
             graph.addEdge((indexer(docNumber, sentenceIndex), indexer(docNumber+1, 0)))
+        #LINKING BETWEEN THE LAST SENTENCE OF THE LAST DOCUMENT AND THE FIRST SENTENCE OF FIRST DOCUMENT
         elif docNumber == num_documents-1:
             graph.addEdge((indexer(docNumber, sentenceIndex), indexer(0, 0)))
 

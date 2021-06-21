@@ -10,7 +10,7 @@ if TRAIN_MODE:
 else:
     graph_path_output = paths.graph_path_dev
 
-graph_path_0 = "CoreferenceGraphsList_dev2_0.pkl"
+graph_path_0 = "CoreferenceGraphsList_dev3_0.pkl"
 
 try:
     with open(graph_path_0, 'rb') as f:
@@ -20,7 +20,7 @@ except:
     graphs_list_0 = list()
 
 
-graph_path_1 = "CoreferenceGraphsList_dev2_1.pkl"
+graph_path_1 = "CoreferenceGraphsList_dev3_1.pkl"
 
 try:
     with open(graph_path_1, 'rb') as f:
