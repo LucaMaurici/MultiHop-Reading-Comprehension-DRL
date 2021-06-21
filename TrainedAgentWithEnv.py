@@ -11,7 +11,7 @@ import pickle
 
 env = MultiHopEnvironment(train_mode=False)
 
-graph_path = "CoreferenceGraphsList_dev3_uniqueAnswerFiltered.pkl"
+graph_path = "CoreferenceGraphsList_dev3.pkl"
 '''
 with open(paths.graph_path_dev, 'rb') as f:
     graphs_list = pickle.load(f)
@@ -40,7 +40,10 @@ for i in range(n_samples):
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
         #observationNew, reward, done, raw_new_state = env.step(action)
-        observationNew, reward, done, raw_new_state = env.step(random.randint(0, 8))
+        #observationNew, reward, done, raw_new_state = env.step(random.randint(0, 8))
+        reward = -0.1
+        while(reward == -0.1):
+            observationNew, reward, done, raw_new_state = env.step(random.randint(0, 34))
         idx_steps += 1
         score += reward
 
@@ -61,6 +64,7 @@ for i in range(n_samples):
 
     if text_to_read != "":
         prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
+        #prediction = myPredictor.myPredict(text_to_read, question)
     else:
         prediction = [("", 1.0)]
     
