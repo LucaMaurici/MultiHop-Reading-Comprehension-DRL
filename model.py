@@ -143,7 +143,7 @@ class DocReader(object):
 
         # When normalized, some words are duplicated. (Average the embeddings).
         vec_counts = {}
-        with open(embedding_file) as f:
+        with open(args.embedding_file, encoding='utf-8', errors='ignore') as f:
             for line in f:
                 parsed = line.rstrip().split(' ')
                 assert(len(parsed) == embedding.size(1) + 1)
@@ -181,7 +181,7 @@ class DocReader(object):
 
         # When normalized, some chars are duplicated. (Average the embeddings).
         vec_counts = {}
-        with open(char_embedding_file) as f:
+        with open(char_embedding_file, encoding='utf-8', errors='ignore') as f:
             for line in f:
                 parsed = line.rstrip().split(' ')
                 assert(len(parsed) == char_embedding.size(1) + 1)
@@ -312,8 +312,8 @@ class DocReader(object):
 
         # Reset any partially fixed parameters (e.g. rare words)
         self.reset_parameters()
-
-        return loss.data[0], ex[0].size(0)
+        
+        return loss.data.item(), ex[0].size(0)
 
     def reset_parameters(self):
         """Reset any partially fixed parameters to original states."""

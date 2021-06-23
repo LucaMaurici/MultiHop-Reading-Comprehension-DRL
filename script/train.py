@@ -144,7 +144,9 @@ def set_defaults(args):
             raise IOError('No such file: %s' % args.char_embedding_file)
 
     # Set model directory
-    subprocess.call(['mkdir', '-p', args.model_dir])
+    #subprocess.call(['mkdir', '-p', args.model_dir])
+    if not os.path.exists(args.model_dir):
+        os.mkdir(args.model_dir)
 
     # Set model name
     if not args.model_name:
@@ -158,14 +160,14 @@ def set_defaults(args):
 
     # Embeddings options
     if args.embedding_file:
-        with open(args.embedding_file) as f:
+        with open(args.embedding_file, encoding='utf-8', errors='ignore') as f:
             dim = len(f.readline().strip().split(' ')) - 1
         args.embedding_dim = dim
     elif not args.embedding_dim:
         raise RuntimeError('Either embedding_file or embedding_dim '
                            'needs to be specified.')
     if args.char_embedding_file:
-        with open(args.char_embedding_file) as f:
+        with open(args.char_embedding_file, encoding='utf-8', errors='ignore') as f:
             dim = len(f.readline().strip().split(' ')) - 1
         args.char_embedding_dim = dim
     elif not args.char_embedding_dim:

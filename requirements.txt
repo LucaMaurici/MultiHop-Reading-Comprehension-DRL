@@ -11,3 +11,6 @@ spacy
 python -m spacy download en_core_web_sm
 
 pip install networkx
+
+// for mnemonic reader interactive mode
+pip install prettytable

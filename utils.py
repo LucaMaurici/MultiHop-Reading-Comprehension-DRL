@@ -90,7 +90,7 @@ def load_answers(filename):
 def index_embedding_words(embedding_file):
     """Put all the words in embedding_file into a set."""
     words = set()
-    with open(embedding_file) as f:
+    with open(embedding_file, encoding='utf-8', errors='ignore') as f:
         for line in f:
             w = Dictionary.normalize(line.rstrip().split(' ')[0])
             words.add(w)
@@ -132,7 +132,7 @@ def build_word_dict(args, examples):
 def index_embedding_chars(char_embedding_file):
     """Put all the chars in char_embedding_file into a set."""
     chars = set()
-    with open(char_embedding_file) as f:
+    with open(char_embedding_file, encoding='utf-8', errors='ignore') as f:
         for line in f:
             c = Dictionary.normalize(line.rstrip().split(' ')[0])
             chars.add(c)
