@@ -1,5 +1,8 @@
 # MultiHop Reading Comprehension-DRL
 
+Paper Datasets: https://www.aclweb.org/anthology/Q18-1021.pdf
+Wikihop in SQuAD format: https://github.com/alontalmor/MultiQA
+
 FATTO: Controllare se, quando si costruisce lo stato, il numero di azioni venga effettivamente costretto a non essere > 8
 minore di 8 già funziona, nel senso che viene aggiunto il è padding in maniera funzionante.
 

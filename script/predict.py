@@ -51,7 +51,7 @@ if __name__ == '__main__':
                         help='Use CPU only')
     parser.add_argument('--gpu', type=int, default=-1,
                         help='Specify GPU device id to use')
-    parser.add_argument('--batch-size', type=int, default=128,
+    parser.add_argument('--batch-size', type=int, default=1, #128
                         help='Example batching size')
     parser.add_argument('--top-n', type=int, default=1,
                         help='Store top N predicted spans per example')

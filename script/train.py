@@ -61,9 +61,9 @@ def add_train_args(parser):
                                'operations (for reproducibility)'))
     runtime.add_argument('--num-epochs', type=int, default=40,
                          help='Train data iterations')
-    runtime.add_argument('--batch-size', type=int, default=45,
+    runtime.add_argument('--batch-size', type=int, default=1, #45
                          help='Batch size for training')
-    runtime.add_argument('--test-batch-size', type=int, default=32,
+    runtime.add_argument('--test-batch-size', type=int, default=1, #32
                          help='Batch size during validation/testing')
 
     # Files
@@ -116,7 +116,7 @@ def add_train_args(parser):
                          help='Validate with official SQuAD eval')
     general.add_argument('--valid-metric', type=str, default='exact_match',
                          help='The evaluation metric used for model selection: None, exact_match, f1')
-    general.add_argument('--display-iter', type=int, default=25,
+    general.add_argument('--display-iter', type=int, default=1,
                          help='Log state after every <display_iter> epochs')
     general.add_argument('--sort-by-len', type='bool', default=True,
                          help='Sort batches by length for speed')

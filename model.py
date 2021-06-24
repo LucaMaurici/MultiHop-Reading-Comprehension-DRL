@@ -143,7 +143,7 @@ class DocReader(object):
 
         # When normalized, some words are duplicated. (Average the embeddings).
         vec_counts = {}
-        with open(args.embedding_file, encoding='utf-8', errors='ignore') as f:
+        with open(embedding_file, encoding='utf-8', errors='ignore') as f:
             for line in f:
                 parsed = line.rstrip().split(' ')
                 assert(len(parsed) == embedding.size(1) + 1)
