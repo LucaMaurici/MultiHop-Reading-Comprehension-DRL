@@ -192,6 +192,7 @@ class MultiHopEnvironment:
             return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
+        #if 
             done = True
             reward = 1
 

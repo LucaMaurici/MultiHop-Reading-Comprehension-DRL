@@ -7,7 +7,7 @@ import sys
 
 predictor = Predictor(
     #"data/models/m_reader.mdl",
-    "data/models/m_reader_retrained.mdl",
+    "data/models/m_reader_retrained2.mdl.checkpoint",
     #"C:\\Users\\lucam\\Documents\\GitHub\\Personale\\MultiHop-Reading-Comprehension-DRL\\MnemonicReader\\data\\models\\m_reader.mdl",
     normalize=True,
     #embedding_file=None,

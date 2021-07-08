@@ -94,11 +94,11 @@ def add_train_args(parser):
 
     # Saving + loading
     save_load = parser.add_argument_group('Saving/Loading')
-    save_load.add_argument('--checkpoint', type='bool', default=False,
+    save_load.add_argument('--checkpoint', type='bool', default=True, #False
                            help='Save model + optimizer state after each epoch')
     save_load.add_argument('--pretrained', type=str, default='',
                            help='Path to a pretrained model to warm-start with')
-    save_load.add_argument('--expand-dictionary', type='bool', default=False,
+    save_load.add_argument('--expand-dictionary', type='bool', default=True, #False
                            help='Expand dictionary of pretrained model to ' +
                                 'include training/dev words of new data')
     # Data preprocessing
@@ -238,7 +238,18 @@ def train(args, data_loader, model, global_stats):
 
     # Run one epoch
     for idx, ex in enumerate(data_loader):
-        train_loss.update(*model.update(ex))
+        #if idx < 23080:
+        if idx < 23000:
+            continue
+        try:
+            train_loss.update(*model.update(ex))
+            #custom
+            if idx % 500 == 0 and args.checkpoint:
+                model.checkpoint("E:\\Models\\MultiHop RC DRL\\m_reader_retrained2.mdl" + '.checkpoint',
+                    global_stats['epoch'])
+        except:
+            logger.info("***CUDA out of memory***")
+            #torch.cuda.empty_cache()
 
         if idx % args.display_iter == 0:
             logger.info('train: Epoch = %d | iter = %d/%d | ' %
