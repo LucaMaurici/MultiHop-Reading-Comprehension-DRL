@@ -15,6 +15,15 @@ def getSampleById(dataset, id):
     return None
 
 '''
+def getSampleById_squad(dataset, id):
+    id = "WikiHop_q_" + id
+    for e in dataset['data'][0]['paragraphs']:
+        if e['qas'][0]['id'] == id:
+            return e
+    return None
+'''
+
+'''
 def encodeState(state, encoder):
     encodedState = list()
     for i, e in enumerate(state):
@@ -114,13 +123,19 @@ class MultiHopEnvironment:
         if(train_mode):
             graph_path = paths.graph_path_train
             dataset_path = paths.dataset_path_train
+            #dataset_path_squad = paths.dataset_path_train_squad
         else:
             graph_path = paths.graph_path_dev
             dataset_path = paths.dataset_path_dev
+            #dataset_path_squad = paths.dataset_path_dev_squad
 
         #with open("./Dataset/train.json", "r") as read_file:
         with open(dataset_path,"r") as read_file:
             self.dataset = json.load(read_file)
+        '''
+        with open(dataset_path_squad,"r") as read_file:
+            self.dataset_squad = json.load(read_file)
+        '''
         #self.reset()
         with open(graph_path, 'rb') as f:
             self.graphs_list = pickle.load(f)
@@ -152,11 +167,20 @@ class MultiHopEnvironment:
         self.sampleId = graphSample['id']
         self.graph = graphSample['graph']
         self.id2sentence = graphSample['id2sentence']
+        self.answer_positions = graphSample['answer_positions']
 
         #print("\n--- Graph: ---\n")
         #print(self.graph.getEdges())
 
         sample = getSampleById(self.dataset, self.sampleId)
+        '''
+        print("\n\n\n---SAMPLE 1---")
+        print(sample)
+        sample_squad = getSampleById_squad(self.dataset_squad, self.sampleId)
+        print("\n---SAMPLE 2---")
+        print(sample_squad)
+        print("\n\n\n")
+        '''
         self.state = [sample['query']] #  state[0] = query
         self.answer = sample['answer']
 
@@ -191,8 +215,8 @@ class MultiHopEnvironment:
             reward = -0.1
             return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
-        if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
-        #if 
+        #if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
+        if self.graph.currentNode in self.answer_positions:
             done = True
             reward = 1
 

@@ -62,7 +62,7 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_2.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_3.pth')
         
         #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
         
@@ -181,8 +181,6 @@ class ActorNetwork(nn.Module):
         self.softmax = nn.Softmax(0)
         
 
-        
-        
         if torch.cuda.is_available():
             self.device = torch.device('cuda:0')
         else:
@@ -216,7 +214,7 @@ class ActorNetwork(nn.Module):
         #print(max_0_output)
         #print(max_0_output.shape)
 
-        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
+        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output]).to(self.device)
 
         #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
         #maxpool1d_output = self.maxpool1d(maxpool1d_input)
@@ -253,7 +251,7 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_2.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_3.pth')
         '''
         self.critic = nn.Sequential(
                 nn.Linear(*input_dims, 256),
@@ -331,7 +329,7 @@ class CriticNetwork(nn.Module):
         max_3_output = torch.max(conv2d_3_output)
         max_4_output = torch.max(conv2d_4_output)
 
-        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
+        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output]).to(self.device)
 
         #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
         #maxpool1d_output = self.maxpool1d(maxpool1d_input)
@@ -398,7 +396,7 @@ class Agent:
         #print("\n---OBSERVATION---")
         #observation = observation.astype('int64')
         #print(np.array(observation))
-        state = torch.tensor(observation).to(self.actor.device).long()
+        state = torch.tensor(observation).long().to(self.actor.device)
         #state = state.unsqueeze_(0)
         #state = state.permute(0,3,1,2)
         #print("\n---SHAPE---")
@@ -406,7 +404,6 @@ class Agent:
 
         #print(np.shape(state.unsqueeze(0)))
         #print(state.unsqueeze(0))
-
 
         dist = self.actor(state.unsqueeze(0))
         value = self.critic(state.unsqueeze(0))

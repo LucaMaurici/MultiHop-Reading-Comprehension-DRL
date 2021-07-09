@@ -4,8 +4,8 @@ import json
 import random
 import paths
 
-N_GRAPHS = 500
-TRAIN_MODE = False
+N_GRAPHS = 5000
+TRAIN_MODE = True
 
 
 def contains_sample(graphs_list, id_tocheck):

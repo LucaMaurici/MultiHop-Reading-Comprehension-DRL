@@ -36,14 +36,16 @@ for i in range(n_samples):
 
     #while not done and idx_steps < n_steps:
     while idx_steps < n_steps:
-        #action, prob, val = agent.choose_action(observationOld)
+        action, prob, val = agent.choose_action(observationOld)
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
-        #observationNew, reward, done, raw_new_state = env.step(action)
+        observationNew, reward, done, raw_new_state = env.step(action)
         #observationNew, reward, done, raw_new_state = env.step(random.randint(0, 8))
+        '''
         reward = -0.1
         while(reward == -0.1):
             observationNew, reward, done, raw_new_state = env.step(random.randint(0, 34))
+        '''
         idx_steps += 1
         score += reward
 
