@@ -62,7 +62,7 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_3.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_4.pth')
         
         #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
         
@@ -153,30 +153,30 @@ class ActorNetwork(nn.Module):
             #padding_idx = 50, 
             #max_norm = 1)
         self.conv2d_0 = nn.Conv2d(
-            in_channels = self.num_channels,
+            in_channels = 1,
             out_channels = 1,
             kernel_size = (1, 51))
         self.conv2d_1 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (2, 51))
         self.conv2d_2 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (5, 51))
         self.conv2d_3 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (10, 51))
         self.conv2d_4 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (20, 51))
         #self.maxpool1d = nn.MaxPool1d(
             #kernel_size = (), 
             #stride = 1)
         self.linear = nn.Linear(
-            in_features = 5,
+            in_features = 5*39,
             out_features = 8)
         self.softmax = nn.Softmax(0)
         
@@ -193,30 +193,46 @@ class ActorNetwork(nn.Module):
     def forward(self, input):
         #print("\n---INPUT---\n")
         embedding_output = self.embedding(input)
+
+        conv2d_0_output = torch.zeros([self.num_channels, 1, 50, 1])
+        conv2d_1_output = torch.zeros([self.num_channels, 1, 49, 1])
+        conv2d_2_output = torch.zeros([self.num_channels, 1, 46, 1])
+        conv2d_3_output = torch.zeros([self.num_channels, 1, 41, 1])
+        conv2d_4_output = torch.zeros([self.num_channels, 1, 31, 1])
+
+        max_0_output = torch.zeros([self.num_channels])
+        max_1_output = torch.zeros([self.num_channels])
+        max_2_output = torch.zeros([self.num_channels])
+        max_3_output = torch.zeros([self.num_channels])
+        max_4_output = torch.zeros([self.num_channels])
         
-        conv2d_0_output = self.conv2d_0(embedding_output)
-        conv2d_0_output = f.relu_(conv2d_0_output)
-        conv2d_1_output = self.conv2d_1(embedding_output)
-        conv2d_1_output = f.relu_(conv2d_1_output)
-        conv2d_2_output = self.conv2d_2(embedding_output)
-        conv2d_2_output = f.relu_(conv2d_2_output)
-        conv2d_3_output = self.conv2d_3(embedding_output)
-        conv2d_3_output = f.relu_(conv2d_3_output)
-        conv2d_4_output = self.conv2d_4(embedding_output)
-        conv2d_4_output = f.relu_(conv2d_4_output)
+        for i in range(self.num_channels):
+            conv2d_0_output[i] = self.conv2d_0(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_0_output[i] = f.relu_(conv2d_0_output[i])
+            conv2d_1_output[i] = self.conv2d_1(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_1_output[i] = f.relu_(conv2d_1_output[i])
+            conv2d_2_output[i] = self.conv2d_2(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_2_output[i] = f.relu_(conv2d_2_output[i])
+            conv2d_3_output[i] = self.conv2d_3(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_3_output[i] = f.relu_(conv2d_3_output[i])
+            conv2d_4_output[i] = self.conv2d_4(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_4_output[i] = f.relu_(conv2d_4_output[i])
 
-        max_0_output = torch.max(conv2d_0_output)
-        max_1_output = torch.max(conv2d_1_output)
-        max_2_output = torch.max(conv2d_2_output)
-        max_3_output = torch.max(conv2d_3_output)
-        max_4_output = torch.max(conv2d_4_output)
+            max_0_output[i] = torch.max(conv2d_0_output[i].squeeze(), 0).values.item()
+            max_1_output[i] = torch.max(conv2d_1_output[i].squeeze(), 0).values.item()
+            max_2_output[i] = torch.max(conv2d_2_output[i].squeeze(), 0).values.item()
+            max_3_output[i] = torch.max(conv2d_3_output[i].squeeze(), 0).values.item()
+            max_4_output[i] = torch.max(conv2d_4_output[i].squeeze(), 0).values.item()
 
-        #print(max_0_output)
-        #print(max_0_output.shape)
+        max_0_output = torch.tensor(max_0_output).to(self.device)
+        max_1_output = torch.tensor(max_1_output).to(self.device)
+        max_2_output = torch.tensor(max_2_output).to(self.device)
+        max_3_output = torch.tensor(max_3_output).to(self.device)
+        max_4_output = torch.tensor(max_4_output).to(self.device)
 
-        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output]).to(self.device)
+        #linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output]).to(self.device)
 
-        #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
+        linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output))
         #maxpool1d_output = self.maxpool1d(maxpool1d_input)
         linear_output = self.linear(linear_input)
         linear_output = f.relu_(linear_output)
@@ -251,7 +267,7 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_3.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_4.pth')
         '''
         self.critic = nn.Sequential(
                 nn.Linear(*input_dims, 256),
@@ -273,34 +289,34 @@ class CriticNetwork(nn.Module):
 
         self.embedding = nn.Embedding(
             num_embeddings = 87429,
-            embedding_dim = 51)
+            embedding_dim = 51) 
             #padding_idx = 50, 
             #max_norm = 1)
         self.conv2d_0 = nn.Conv2d(
-            in_channels = self.num_channels,
+            in_channels = 1,
             out_channels = 1,
             kernel_size = (1, 51))
         self.conv2d_1 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (2, 51))
         self.conv2d_2 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (5, 51))
         self.conv2d_3 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (10, 51))
         self.conv2d_4 = nn.Conv2d(
-            in_channels = self.num_channels, 
+            in_channels = 1, 
             out_channels = 1,
             kernel_size = (20, 51))
         #self.maxpool1d = nn.MaxPool1d(
             #kernel_size = (), 
             #stride = 1)
         self.linear = nn.Linear(
-            in_features = 5,
+            in_features = 5*39,
             out_features = 1)
 
 
@@ -311,27 +327,45 @@ class CriticNetwork(nn.Module):
     def forward(self, input):
         embedding_output = self.embedding(input)
         
-        conv2d_0_output = self.conv2d_0(embedding_output)
-        conv2d_0_output = f.relu_(conv2d_0_output)
-        conv2d_1_output = self.conv2d_1(embedding_output)
-        conv2d_1_output = f.relu_(conv2d_1_output)
-        conv2d_2_output = self.conv2d_2(embedding_output)
-        conv2d_2_output = f.relu_(conv2d_2_output)
-        conv2d_3_output = self.conv2d_3(embedding_output)
-        conv2d_3_output = f.relu_(conv2d_3_output)
-        conv2d_4_output = self.conv2d_4(embedding_output)
-        conv2d_4_output = f.relu_(conv2d_4_output)
-        #print(np.shape(conv2d_4_output))
+        conv2d_0_output = torch.zeros([self.num_channels, 1, 50, 1])
+        conv2d_1_output = torch.zeros([self.num_channels, 1, 49, 1])
+        conv2d_2_output = torch.zeros([self.num_channels, 1, 46, 1])
+        conv2d_3_output = torch.zeros([self.num_channels, 1, 41, 1])
+        conv2d_4_output = torch.zeros([self.num_channels, 1, 31, 1])
 
-        max_0_output = torch.max(conv2d_0_output)
-        max_1_output = torch.max(conv2d_1_output)
-        max_2_output = torch.max(conv2d_2_output)
-        max_3_output = torch.max(conv2d_3_output)
-        max_4_output = torch.max(conv2d_4_output)
+        max_0_output = torch.zeros([self.num_channels])
+        max_1_output = torch.zeros([self.num_channels])
+        max_2_output = torch.zeros([self.num_channels])
+        max_3_output = torch.zeros([self.num_channels])
+        max_4_output = torch.zeros([self.num_channels])
+        
+        for i in range(self.num_channels):
+            conv2d_0_output[i] = self.conv2d_0(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_0_output[i] = f.relu_(conv2d_0_output[i])
+            conv2d_1_output[i] = self.conv2d_1(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_1_output[i] = f.relu_(conv2d_1_output[i])
+            conv2d_2_output[i] = self.conv2d_2(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_2_output[i] = f.relu_(conv2d_2_output[i])
+            conv2d_3_output[i] = self.conv2d_3(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_3_output[i] = f.relu_(conv2d_3_output[i])
+            conv2d_4_output[i] = self.conv2d_4(embedding_output[0][i].unsqueeze(0).unsqueeze(0))
+            conv2d_4_output[i] = f.relu_(conv2d_4_output[i])
 
-        linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output]).to(self.device)
+            max_0_output[i] = torch.max(conv2d_0_output[i].squeeze(), 0).values.item()
+            max_1_output[i] = torch.max(conv2d_1_output[i].squeeze(), 0).values.item()
+            max_2_output[i] = torch.max(conv2d_2_output[i].squeeze(), 0).values.item()
+            max_3_output[i] = torch.max(conv2d_3_output[i].squeeze(), 0).values.item()
+            max_4_output[i] = torch.max(conv2d_4_output[i].squeeze(), 0).values.item()
+        #print(max_0_output)
+        max_0_output = torch.tensor(max_0_output).to(self.device)
+        max_1_output = torch.tensor(max_1_output).to(self.device)
+        max_2_output = torch.tensor(max_2_output).to(self.device)
+        max_3_output = torch.tensor(max_3_output).to(self.device)
+        max_4_output = torch.tensor(max_4_output).to(self.device)
 
-        #linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim=-1)
+        #linear_input = torch.tensor([max_0_output, max_1_output, max_2_output, max_3_output, max_4_output])
+
+        linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output))
         #maxpool1d_output = self.maxpool1d(maxpool1d_input)
         linear_output = self.linear(linear_input)
         #linear_output = f.relu_(linear_output)
