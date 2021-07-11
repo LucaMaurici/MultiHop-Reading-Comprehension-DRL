@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 'time_steps', idx_globalSteps, 'learning_steps', learn_iters)
 
     x = [i+1 for i in range(len(score_history))]
-    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_3.jpg")
+    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_4.jpg")
     plot_learning_curve(x, score_history, "temp\\learning_curve_torch_ppo_3.jpg")
 
 
