@@ -40,7 +40,7 @@ for i in range(n_samples):
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
         observationNew, reward, done, raw_new_state = env.step(action)
-        #observationNew, reward, done, raw_new_state = env.step(random.randint(0, 8))
+        #observationNew, reward, done, raw_new_state = env.step(random.randint(0, 20))
         '''
         reward = -0.1
         while(reward == -0.1):

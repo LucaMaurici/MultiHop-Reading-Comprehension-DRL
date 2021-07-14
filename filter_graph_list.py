@@ -1,7 +1,7 @@
 import pickle
 import paths
 
-TRAIN_MODE = False
+TRAIN_MODE = True
 UNIQUE_ANSWER_FILTERED = True
 
 #--- Train ---
