@@ -5,7 +5,7 @@ from MultiHopEnvironment import MultiHopEnvironment
 import dill
 import wandb
 
-LOAD_CHECKPOINT = False
+LOAD_CHECKPOINT = True
 
 if __name__ == '__main__':
     env = MultiHopEnvironment(train_mode=True)
@@ -16,12 +16,12 @@ if __name__ == '__main__':
         encoder = dill.load(f)
     print('Encoder opened')
 
-    N = 1
+    N = 50
     n_actions = 8
     batch_size = 30
-    n_epochs = 1
-    alpha = 30 #0.003
-    n_episodes = 500
+    n_epochs = 5
+    alpha = 0.003 #0.003
+    n_episodes = 5000
     n_steps = 30
     agent = Agent(batch_size=batch_size, alpha=alpha, n_epochs=n_epochs)
     if LOAD_CHECKPOINT:
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     idx_globalSteps = 0
     score_history = list()
 
-    run = wandb.init(project='Multi-Hop_Reading_Comprehension_1')
+    run = wandb.init(project='Multi-Hop_Reading_Comprehension_2')
     # Log gradients and model parameters
     wandb.watch(agent.actor)
     wandb.watch(agent.critic)
@@ -79,13 +79,13 @@ if __name__ == '__main__':
                 'time_steps', idx_globalSteps, 'learning_steps', learn_iters)
 
         # Log metrics to visualize performance
-        wandb.log({'Train avg_score': avg_score})
+        wandb.log({'Train avg_score': avg_score, 'Score': score})
 
     run.finish()
 
     x = [i+1 for i in range(len(score_history))]
-    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_6.jpg")
-    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_ppo_6.jpg")
+    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_2.2.jpg")
+    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_ppo_2.2.jpg")
 
 
 

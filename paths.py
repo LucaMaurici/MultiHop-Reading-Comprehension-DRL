@@ -7,3 +7,6 @@ graph_path_dev = "CoreferenceGraphsList_dev3.pkl"
 dataset_path_dev = "E:/Datasets/Wikihop/dev.json"
 dataset_path_dev_squad = "data/datasets/squad2-0_format_data_WikiHop_dev_FILTERED.json"
 #dataset_path_dev = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/dev.json"
+
+
+embedding = "E:/Datasets/Embeddings/glove.6B.50d.txt"

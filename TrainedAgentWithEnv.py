@@ -1,6 +1,7 @@
 #from MnemonicReader import myPredictor
 import myPredictor
-from MultiHopEnvironment import MultiHopEnvironment, decode_state
+#from MultiHopEnvironment import MultiHopEnvironment, decode_state
+from MultiHopEnvironment import MultiHopEnvironment
 from PPO import Agent
 import warnings
 import utils

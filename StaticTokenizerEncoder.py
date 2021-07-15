@@ -32,7 +32,7 @@ for graphSample in graphs_list:
 
 print('Data loaded')
 
-encoder = StaticTokenizerEncoder(loaded_data, min_occurrences=3, tokenize=lambda s: s.split())
+encoder = StaticTokenizerEncoder(loaded_data, min_occurrences=1, tokenize=lambda s: s.split())
 
 print('Encoder fitted')
 

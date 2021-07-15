@@ -6,6 +6,8 @@ import torch.optim as optim
 from torch.distributions.categorical import Categorical
 import numpy as np
 import wandb
+import pickle
+import random
 
 class PPOMemory:
     def __init__(self, batch_size):
@@ -63,117 +65,51 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_6.pth')
-        
-        #self.actor = nn.Sequential(nn.Linear(*input_dims, 256),nn.ReLU(),nn.Linear(256, 128),nn.ReLU(),nn.Linear(128, n_action),nn.Softmax(dim=-1))
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_2.2.pth')
         
         #--------------------------------------------------------
         self.num_actions = 8
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
-        
+        self.embedding_dim = 50
+
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
+
+        vocab_size = embedding_matrix.shape[0]
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
 
         '''
         self.embedding = nn.Embedding(
-            num_embeddings = 87429, 
-            embedding_dim = 50, 
-            padding_idx = 50, 
-            max_norm = 1)
-        self.conv2d = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 50, self.num_channels), 
-            kernel_size = (50, 1, 1))
-        self.conv2d_1 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
-            kernel_size = (50, 2, 1))
-        self.conv2d_2 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
-            kernel_size = (50, 5, 1))
-        self.conv2d_3 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
-            kernel_size = (50, 10, 1))
-        self.conv2d_4 = nn.Conv2d(
-            in_channels = (50, 50, self.num_channels), 
-            out_channels = (1, 48, self.num_channels), 
-            kernel_size = (50, 20, 1))
-        self.maxpool1d = nn.MaxPool1d(
-            kernel_size = (1, 50, 1), 
-            stride = 1)
-        self.linear = nn.Linear(
-            in_features = self.num_channels, 
-            out_features = 8)
-        self.softmax = nn.Softmax(
-            name = Softmax, 
-            dim = self.num_actions)
-        '''
-        '''
-        self.embedding = nn.Embedding(
-            num_embeddings = 87429, 
-            embedding_dim = 50, 
-            #padding_idx = 50, 
-            max_norm = 1)
-        self.conv2d = nn.Conv2d(
-            in_channels = self.num_channels,
-            out_channels = self.num_channels,
-            kernel_size = (1, 1, 50),
-            #stride = [1,1,0],
-            #padding = [0,1,0],
-            #dilation = [1,1,1]
-            )
-        self.conv2d_1 = nn.Conv2d(
-            in_channels = self.num_channels, 
-            out_channels = self.num_channels,
-            kernel_size = (50, 2, 1))
-        self.conv2d_2 = nn.Conv2d(
-            in_channels = self.num_channels, 
-            out_channels = self.num_channels,
-            kernel_size = (50, 5, 1))
-        self.conv2d_3 = nn.Conv2d(
-            in_channels = self.num_channels, 
-            out_channels = self.num_channels,
-            kernel_size = (50, 10, 1))
-        self.conv2d_4 = nn.Conv2d(
-            in_channels = self.num_channels, 
-            out_channels = self.num_channels,
-            kernel_size = (50, 20, 1))
-        self.maxpool1d = nn.MaxPool1d(
-            kernel_size = (1, 50, 1), 
-            stride = 1)
-        self.linear = nn.Linear(
-            in_features = self.num_channels, 
-            out_features = 8)
-        self.softmax = nn.Softmax(
-            dim = self.num_actions)
-        '''
-        self.embedding = nn.Embedding(
-            num_embeddings = 87429,
-            embedding_dim = 51) 
+            num_embeddings = 201585,
+            embedding_dim = self.embedding_dim) 
             #padding_idx = 50, 
             #max_norm = 1)
+        '''
         self.conv2d_0 = nn.Conv2d(
-            in_channels = 51,
+            in_channels = self.embedding_dim,
             out_channels = 1,
             kernel_size = (1, 1))
         self.conv2d_1 = nn.Conv2d(
-            in_channels = 51,
+            in_channels = self.embedding_dim,
             out_channels = 1,
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
-            in_channels = 51,
+            in_channels = self.embedding_dim,
             out_channels = 1,
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
-            in_channels = 51,
+            in_channels = self.embedding_dim,
             out_channels = 1,
             kernel_size = (10, 1))
         self.conv2d_4 = nn.Conv2d(
-            in_channels = 51,
+            in_channels = self.embedding_dim,
             out_channels = 1,
             kernel_size = (20, 1))
-        self.ReLU = nn.LeakyReLU()
+        self.ReLU = nn.ReLU()
         self.maxpool2d_0 = nn.MaxPool2d(
             kernel_size = (50, 1),
             stride = 1)
@@ -198,7 +134,7 @@ class ActorNetwork(nn.Module):
         self.linear_1 = nn.Linear(
             in_features = 64,
             out_features = self.num_actions)
-        self.softmax = nn.Softmax(0)
+        self.softmax = nn.Softmax(3)
         
 
         if not torch.cuda.is_available(): # NOT sbagliato
@@ -212,41 +148,9 @@ class ActorNetwork(nn.Module):
 
     def forward(self, input):
         #print("\n\n\n\n---FORWARD---\n")
-        #print(input.shape)
         embedding_output = self.embedding(input)
 
-        #conv2d_0_output = []
-        #conv2d_1_output = []
-        #conv2d_2_output = []
-        #conv2d_3_output = []
-        #conv2d_4_output = []
-
-        '''
-        for i in range(input.shape[0]):
-            conv2d_0_output.append(list())
-            for j in range(self.num_channels):
-                conv2d_0_output[i].append(self.conv2d_0(embedding_output[i][j]))
-                conv2d_0_output[i][j] = f.relu_(conv2d_0_output[i][j])
-        '''
-        
-        #conv2d_0_output = torch.zeros([input.shape[0], self.num_channels, 50, 1])
-        #conv2d_0_output_relu = torch.zeros([input.shape[0], self.num_channels, 50, 1])
-        #conv2d_1_output = torch.zeros([input.shape[0], self.num_channels, 49, 1])
-        #conv2d_2_output = torch.zeros([input.shape[0], self.num_channels, 46, 1])
-        #conv2d_3_output = torch.zeros([input.shape[0], self.num_channels, 41, 1])
-        #conv2d_4_output = torch.zeros([input.shape[0], self.num_channels, 31, 1])
-
-        #max_0_output = torch.zeros([input.shape[0], self.num_channels])
-        #max_1_output = torch.zeros([input.shape[0], self.num_channels])
-        #max_2_output = torch.zeros([input.shape[0], self.num_channels])
-        #max_3_output = torch.zeros([input.shape[0], self.num_channels])
-        #max_4_output = torch.zeros([input.shape[0], self.num_channels])
-
-        print(embedding_output.shape)
-        #convOutput = self.conv2d_0(embedding_output)
-        #print(convOutput.shape)
-
-        embedding_output_reshaped = embedding_output.reshape(input.shape[0], 51, 50, self.num_channels).detach().clone()
+        embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim, 50, self.num_channels).detach().clone()
 
         conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
         conv2d_0_output_relu = self.ReLU(conv2d_0_output)
@@ -258,104 +162,27 @@ class ActorNetwork(nn.Module):
         conv2d_3_output_relu = self.ReLU(conv2d_3_output)
         conv2d_4_output = self.conv2d_0(embedding_output_reshaped)
         conv2d_4_output_relu = self.ReLU(conv2d_4_output)
-        print(conv2d_0_output.shape)
 
         max_0_output = self.maxpool2d_0(conv2d_0_output_relu)
         max_1_output = self.maxpool2d_0(conv2d_1_output_relu)
         max_2_output = self.maxpool2d_0(conv2d_2_output_relu)
         max_3_output = self.maxpool2d_0(conv2d_3_output_relu)
         max_4_output = self.maxpool2d_0(conv2d_4_output_relu)
-        print(max_0_output.shape)
 
-        '''
-        for i in range(input.shape[0]):
-            for j in range(self.num_channels):
-                conv2d_0_output[i][j] = self.conv2d_0(embedding_output[i][j].unsqueeze(0).unsqueeze(0)).detach().clone()
-                conv2d_0_output_relu[i][j] = self.ReLU(conv2d_0_output[i][j].unsqueeze(0).unsqueeze(0)).detach().clone()
-                #print(conv2d_0_output[i][j])
-                conv2d_1_output[i][j] = self.conv2d_1(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_1_output[i][j] = self.ReLU(conv2d_1_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_2_output[i][j] = self.conv2d_2(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_2_output[i][j] = self.ReLU(conv2d_2_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_3_output[i][j] = self.conv2d_3(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_3_output[i][j] = self.ReLU(conv2d_3_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_4_output[i][j] = self.conv2d_4(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_4_output[i][j] = self.ReLU(conv2d_4_output[i][j].unsqueeze(0).unsqueeze(0))
-        '''
-        '''
-        conv2d_0_output = conv2d_0_output.squeeze()
-        if len(conv2d_0_output.shape) == 2: conv2d_0_output = conv2d_0_output.unsqueeze(0)
-        max_0_output = self.maxpool1d_0(conv2d_0_output).squeeze()
-        print(max_0_output.shape)
-
-        conv2d_1_output = conv2d_1_output.squeeze()
-        if len(conv2d_1_output.shape) == 2: conv2d_1_output = conv2d_1_output.unsqueeze(0)
-        max_1_output = self.maxpool1d_1(conv2d_1_output).squeeze()
-
-        conv2d_2_output = conv2d_2_output.squeeze()
-        if len(conv2d_2_output.shape) == 2: conv2d_2_output = conv2d_2_output.unsqueeze(0)
-        max_2_output = self.maxpool1d_2(conv2d_2_output).squeeze()
-
-        conv2d_3_output = conv2d_3_output.squeeze()
-        if len(conv2d_3_output.shape) == 2: conv2d_3_output = conv2d_3_output.unsqueeze(0)
-        max_3_output = self.maxpool1d_3(conv2d_3_output).squeeze()
-
-        conv2d_4_output = conv2d_4_output.squeeze()
-        if len(conv2d_4_output.shape) == 2: conv2d_4_output = conv2d_4_output.unsqueeze(0)
-        max_4_output = self.maxpool1d_4(conv2d_4_output).squeeze()
-        '''
-
-        '''
-        max_0_output = self.maxpool1d_1(conv2d_0_output.squeeze().unsqueeze(0)).squeeze()
-        max_1_output = self.maxpool1d_1(conv2d_1_output.squeeze().unsqueeze(0)).squeeze()
-        max_2_output = self.maxpool1d_2(conv2d_2_output.squeeze().unsqueeze(0)).squeeze()
-        max_3_output = self.maxpool1d_3(conv2d_3_output.squeeze().unsqueeze(0)).squeeze()
-        max_4_output = self.maxpool1d_4(conv2d_4_output.squeeze().unsqueeze(0)).squeeze()
-        '''
-        #conv2d_0_output_relu_flattened = conv2d_0_output_relu.flatten(start_dim=1)
-        #conv2d_1_output_relu_flattened = conv2d_1_output_relu.flatten(start_dim=1)
-        #conv2d_2_output_relu_flattened = conv2d_2_output_relu.flatten(start_dim=1)
-        #conv2d_3_output_relu_flattened = conv2d_3_output_relu.flatten(start_dim=1)
-        #conv2d_4_output_relu_flattened = conv2d_4_output_relu.flatten(start_dim=1)
         linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
             max_3_output, max_4_output), dim = -1)
-        print(linear_input.shape)
+
+        #linear_input_reshaped = linear_input.reshape(input.shape[0], 1, 1, 1950).detach().clone()
 
         linear_0_output = self.linear_0(linear_input)
         linear_0_output_relu = self.ReLU(linear_0_output)
         linear_0_output_relu_dropout = self.dropout(linear_0_output_relu)
         linear_1_output = self.linear_1(linear_0_output_relu_dropout)
-        '''
-        linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim = -1)
-        if len(linear_input.shape) == 1: linear_input = linear_input.unsqueeze(0)
-        print(f"\n\nlinear_input.shape: {linear_input.shape}")
-        linear_output = self.linear_0(linear_input)
-        linear_output = self.ReLU(linear_output)
-        linear_output = self.dropout(linear_output)
-        linear_output = self.linear_1(linear_output)
-        softmax_output = self.softmax(linear_output)
-        '''
-        #print(f"\n\nlinear_output.shape: {linear_output.shape}\n\n")
 
-        #print("---END FORWARD---\n")
-
-        #print(conv2d_0_output.shape[0])
-
-        #if conv2d_0_output_relu.shape[0] == 1: conv2d_0_output_reshaped = torch.reshape(conv2d_0_output_relu, (1, 1950)).detach().clone()
-        #else: conv2d_0_output_reshaped = torch.reshape(conv2d_0_output_relu, (conv2d_0_output.shape[0], 1950)).detach().clone()
-
-        #return softmax_output
-        #return self.softmax(self.linear_0(conv2d_0_output_reshaped))
-        #convOutputFlattened = conv2d_0_output_relu.flatten(start_dim=1)
+        #print(f"linear_1_output.shape: {linear_1_output.shape}")
+        
         return self.softmax(linear_1_output)
     #------------------------------------------------------------
-
-    '''
-    def forward(self, state):
-        dist = self.actor(state)
-        dist = Categorical(dist)
-        return dist
-    '''
 
     def save_checkpoint(self):
         try: os.makedirs(self.checkpoint_dir)
@@ -377,54 +204,55 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_6.pth')
-        '''
-        self.critic = nn.Sequential(
-                nn.Linear(*input_dims, 256),
-                nn.ReLU(),
-                nn.Linear(256, 128),
-                nn.ReLU(),
-                nn.Linear(128, 1)
-        )
-        '''
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_2.2.pth')
 
         #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
-        
 
         #--------------------------------------------------------
         self.num_actions = 8
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
+        self.embedding_dim = 50
 
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
 
+        vocab_size = embedding_matrix.shape[0]
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
+
+        '''
         self.embedding = nn.Embedding(
-            num_embeddings = 87429,
-            embedding_dim = 51) 
+            num_embeddings = 201585,
+            embedding_dim = self.embedding_dim) 
             #padding_idx = 50, 
             #max_norm = 1)
+        '''
         self.conv2d_0 = nn.Conv2d(
-            in_channels = 1,
+            in_channels = self.embedding_dim,
             out_channels = 1,
-            kernel_size = (1, 51))
+            kernel_size = (1, 1))
         self.conv2d_1 = nn.Conv2d(
-            in_channels = 1, 
+            in_channels = self.embedding_dim,
             out_channels = 1,
-            kernel_size = (2, 51))
+            kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
-            in_channels = 1, 
+            in_channels = self.embedding_dim,
             out_channels = 1,
-            kernel_size = (5, 51))
+            kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
-            in_channels = 1, 
+            in_channels = self.embedding_dim,
             out_channels = 1,
-            kernel_size = (10, 51))
+            kernel_size = (10, 1))
         self.conv2d_4 = nn.Conv2d(
-            in_channels = 1, 
+            in_channels = self.embedding_dim,
             out_channels = 1,
-            kernel_size = (20, 51))
-        self.ReLU = nn.LeakyReLU()
-        self.maxpool1d_0 = nn.MaxPool1d(
-            kernel_size = 50,
+            kernel_size = (20, 1))
+        self.ReLU = nn.ReLU()
+        self.maxpool2d_0 = nn.MaxPool2d(
+            kernel_size = (50, 1),
             stride = 1)
         self.maxpool1d_1 = nn.MaxPool1d(
             kernel_size = 49,
@@ -440,7 +268,9 @@ class CriticNetwork(nn.Module):
             stride = 1)
         self.linear_0 = nn.Linear(
             in_features = 5*self.num_channels,
+            #in_features = 195,
             out_features = 64)
+        # ReLU
         self.dropout = nn.Dropout(p=0.5, inplace=False)
         self.linear_1 = nn.Linear(
             in_features = 64,
@@ -453,92 +283,36 @@ class CriticNetwork(nn.Module):
 
     def forward(self, input):
         embedding_output = self.embedding(input)
-        '''
-        conv2d_0_output = []
-        conv2d_1_output = []
-        conv2d_2_output = []
-        conv2d_3_output = []
-        conv2d_4_output = []
-        for i in range(input.shape[0]):
-            conv2d_0_output.append(list())
-            for j in range(self.num_channels):
-                conv2d_0_output[i].append(self.conv2d_0(embedding_output[i][j]))
-                conv2d_0_output[i][j] = f.relu_(conv2d_0_output[i][j])
-        '''
-        conv2d_0_output = torch.zeros([input.shape[0], self.num_channels, 50, 1])
-        conv2d_1_output = torch.zeros([input.shape[0], self.num_channels, 49, 1])
-        conv2d_2_output = torch.zeros([input.shape[0], self.num_channels, 46, 1])
-        conv2d_3_output = torch.zeros([input.shape[0], self.num_channels, 41, 1])
-        conv2d_4_output = torch.zeros([input.shape[0], self.num_channels, 31, 1])
 
-        max_0_output = torch.zeros([input.shape[0], self.num_channels])
-        max_1_output = torch.zeros([input.shape[0], self.num_channels])
-        max_2_output = torch.zeros([input.shape[0], self.num_channels])
-        max_3_output = torch.zeros([input.shape[0], self.num_channels])
-        max_4_output = torch.zeros([input.shape[0], self.num_channels])
+        embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim, 50, self.num_channels).detach().clone()
 
-        for i in range(input.shape[0]):
-            for j in range(self.num_channels):
-                conv2d_0_output[i][j] = self.conv2d_0(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_0_output[i][j] = self.ReLU(conv2d_0_output[i][j].unsqueeze(0).unsqueeze(0))
-                #print(conv2d_0_output[i][j])
-                conv2d_1_output[i][j] = self.conv2d_1(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_1_output[i][j] = self.ReLU(conv2d_1_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_2_output[i][j] = self.conv2d_2(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_2_output[i][j] = self.ReLU(conv2d_2_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_3_output[i][j] = self.conv2d_3(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_3_output[i][j] = self.ReLU(conv2d_3_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_4_output[i][j] = self.conv2d_4(embedding_output[i][j].unsqueeze(0).unsqueeze(0))
-                conv2d_4_output[i][j] = self.ReLU(conv2d_4_output[i][j].unsqueeze(0).unsqueeze(0))
+        conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_0_output_relu = self.ReLU(conv2d_0_output)
+        conv2d_1_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_1_output_relu = self.ReLU(conv2d_1_output)
+        conv2d_2_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_2_output_relu = self.ReLU(conv2d_2_output)
+        conv2d_3_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_3_output_relu = self.ReLU(conv2d_3_output)
+        conv2d_4_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_4_output_relu = self.ReLU(conv2d_4_output)
 
-        '''
-        conv2d_0_output = conv2d_0_output.squeeze()
-        if len(conv2d_0_output.shape) == 2: conv2d_0_output = conv2d_0_output.unsqueeze(0)
-        max_0_output = self.maxpool1d_0(conv2d_0_output).squeeze()
-        print(max_0_output.shape)
+        max_0_output = self.maxpool2d_0(conv2d_0_output_relu)
+        max_1_output = self.maxpool2d_0(conv2d_1_output_relu)
+        max_2_output = self.maxpool2d_0(conv2d_2_output_relu)
+        max_3_output = self.maxpool2d_0(conv2d_3_output_relu)
+        max_4_output = self.maxpool2d_0(conv2d_4_output_relu)
 
-        conv2d_1_output = conv2d_1_output.squeeze()
-        if len(conv2d_1_output.shape) == 2: conv2d_1_output = conv2d_1_output.unsqueeze(0)
-        max_1_output = self.maxpool1d_1(conv2d_1_output).squeeze()
+        linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
+            max_3_output, max_4_output), dim = -1)
 
-        conv2d_2_output = conv2d_2_output.squeeze()
-        if len(conv2d_2_output.shape) == 2: conv2d_2_output = conv2d_2_output.unsqueeze(0)
-        max_2_output = self.maxpool1d_2(conv2d_2_output).squeeze()
-
-        conv2d_3_output = conv2d_3_output.squeeze()
-        if len(conv2d_3_output.shape) == 2: conv2d_3_output = conv2d_3_output.unsqueeze(0)
-        max_3_output = self.maxpool1d_3(conv2d_3_output).squeeze()
-
-        conv2d_4_output = conv2d_4_output.squeeze()
-        if len(conv2d_4_output.shape) == 2: conv2d_4_output = conv2d_4_output.unsqueeze(0)
-        max_4_output = self.maxpool1d_4(conv2d_4_output).squeeze()
-        '''
-
-        '''
-        max_0_output = self.maxpool1d_1(conv2d_0_output.squeeze().unsqueeze(0)).squeeze()
-        max_1_output = self.maxpool1d_1(conv2d_1_output.squeeze().unsqueeze(0)).squeeze()
-        max_2_output = self.maxpool1d_2(conv2d_2_output.squeeze().unsqueeze(0)).squeeze()
-        max_3_output = self.maxpool1d_3(conv2d_3_output.squeeze().unsqueeze(0)).squeeze()
-        max_4_output = self.maxpool1d_4(conv2d_4_output.squeeze().unsqueeze(0)).squeeze()
-        '''
-
-        linear_input = torch.cat((max_0_output, max_1_output, max_2_output, max_3_output, max_4_output), dim = -1)
-        if len(linear_input.shape) == 1: linear_input = linear_input.unsqueeze(0)
-        print(f"\n\nlinear_input.shape: {linear_input.shape}")
+        linear_0_output = self.linear_0(linear_input)
+        linear_0_output_relu = self.ReLU(linear_0_output)
+        linear_0_output_relu_dropout = self.dropout(linear_0_output_relu)
+        linear_1_output = self.linear_1(linear_0_output_relu_dropout)
         
-        #maxpool1d_output = self.maxpool1d(maxpool1d_input)
-        linear_output = self.linear_0(linear_input)
-        #linear_output = self.ReLU(linear_output)
-        linear_output = self.dropout(linear_output)
-        linear_output = self.linear_1(linear_output)
-        
-        return linear_output
+        return linear_1_output
     #------------------------------------------------------------
-
-    '''
-    def forward(self, state):
-        return self.critic(state)
-    '''
 
     def save_checkpoint(self):
         try: os.makedirs(self.checkpoint_dir)
@@ -573,11 +347,11 @@ class Agent:
             if param.requires_grad:
                 print(name, param.data)
 
-        self.actor.optimizer = optim.RMSprop(self.actor.parameters())
-        #self.actor.optimizer = optim.Adam(self.actor.parameters())
+        #self.actor.optimizer = optim.RMSprop(self.actor.parameters())
+        self.actor.optimizer = optim.Adam(self.actor.parameters())
         self.critic = CriticNetwork(alpha)
-        #self.critic.optimizer = optim.Adam(self.critic.parameters())
-        self.critic.optimizer = optim.RMSprop(self.critic.parameters())
+        self.critic.optimizer = optim.Adam(self.critic.parameters())
+        #self.critic.optimizer = optim.RMSprop(self.critic.parameters())
         self.memory = PPOMemory(batch_size)
        
     def remember(self, state, action, probs, vals, reward, done):
@@ -613,7 +387,11 @@ class Agent:
         #print(state.unsqueeze(0).shape)
         dist = self.actor(state.unsqueeze(0))
         value = self.critic(state.unsqueeze(0))
-        #print(f"Action distribution: {dist}")
+
+        randomNumber = random.randint(0, 49)
+        if randomNumber == 0:
+            print(f"Action distribution: {dist}")
+
         dist = Categorical(dist)
         
         action = dist.sample()
@@ -650,6 +428,7 @@ class Agent:
                     discount *= self.gamma*self.gae_lambda
                 advantage[t] = a_t
             advantage = torch.tensor(advantage).to(self.actor.device)
+            #print(advantage)
 
             values = torch.tensor(values).to(self.actor.device)
             #print(f"BATCHES: {batches}")
@@ -687,7 +466,11 @@ class Agent:
                 #print(advantage[batch])
                 #print(values[batch])
                 #print(returns)
+                #print("\n+++Returns and Critic_value+++")
+                #print(returns, critic_value)
                 critic_loss = (returns-critic_value)**2
+                #print("\n+++CRITIC LOSSES+++")
+                #print(critic_loss)
                 critic_loss = critic_loss.mean()
 
                 total_loss = actor_loss + 2*critic_loss

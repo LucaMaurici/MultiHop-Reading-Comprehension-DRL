@@ -4,7 +4,10 @@ import random
 import pickle
 import Graph_class as gs
 import dill
-from torchnlp.encoders.text import StaticTokenizerEncoder, stack_and_pad_tensors, pad_tensor
+
+#from torchnlp.encoders.text import StaticTokenizerEncoder, stack_and_pad_tensors, pad_tensor
+from keras import preprocessing
+
 import numpy as np
 import paths
 
@@ -70,20 +73,24 @@ def encodeState(state, encoder):
     encodedState = list()
     for i, e in enumerate(state):
         if i==0:
-            encodedState.append(encoder.encode(e).tolist())
+            #encodedState.append(encoder.encode(e).tolist())
+            #print(encoder.texts_to_sequences([e])[0])
+            encodedState.append(encoder.texts_to_sequences([e])[0])
         elif i==1:
             num = 0
             if len(e) > 8:  # truncate actions if num_actions > 8
                 e = e[0:8]
             for sentence in e:
-                encodedState.append(encoder.encode(sentence).tolist())
+                #encodedState.append(encoder.encode(sentence).tolist())
+                encodedState.append(encoder.texts_to_sequences([sentence])[0])
                 num +=1
             for j in range(8-num):  # pad if num_actions < 8
                 encodedState.append(list())
         elif i==2:
             num = 0
             for sentence in e:
-                encodedState.append(encoder.encode(sentence).tolist())
+                #encodedState.append(encoder.encode(sentence).tolist())
+                encodedState.append(encoder.texts_to_sequences([sentence])[0])
                 num +=1
             for j in range(30-num):
                 encodedState.append(list())
@@ -93,25 +100,30 @@ def encodeState(state, encoder):
     encodedState = padState(encodedState)
     return encodedState
 
-# TODO
+# TODO ma mi sa non utile
 def unpad_state(state):
     return state
 
+# non si usa mai
 def decode_state(state, encoder):
     decoded_state = list()
     actions = list()
     history = list()
     for i, e in enumerate(state):
         if i==0:
-            question = encoder.decode(e)
+            #question = encoder.decode(e)
+            question = encoder.sequences_to_texts(e)
             decoded_state.append(question)
         elif i>=1 and i<=8:
-            actions.append(encoder.decode(e))
+            #actions.append(encoder.decode(e))
+            actions.append(encoder.sequences_to_texts(e))
         elif i>=9 <=38:
-            history.append(encoder.decode(e))
+            #history.append(encoder.decode(e))
+            history.append(encoder.sequences_to_texts(e))
     decoded_state.append(actions)
     decoded_state.append(history)
     decoded_state = unpad_state(decoded_state)
+    print(decoded_state)
     return decoded_state
 
 
@@ -140,7 +152,11 @@ class MultiHopEnvironment:
         with open(graph_path, 'rb') as f:
             self.graphs_list = pickle.load(f)
 
+        '''
         with open('StaticTokenizerEncoder.pkl', 'rb') as f:
+            self.encoder = dill.load(f)
+        '''
+        with open('tokenizer_glove.pkl', 'rb') as f:
             self.encoder = dill.load(f)
         #print('Encoder opened')
         
@@ -213,18 +229,19 @@ class MultiHopEnvironment:
             self.graph.goTo(self.actions[actionIndex])
         else:
             reward = -0.1
-            return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
-
-        #if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
-        if self.graph.currentNode in self.answer_positions:
-            done = True
-            reward = 1
+            self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
+            #return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         self.actions = self.graph.getAdjacentNodes()
         self.state[1] = []
         for actionID in self.actions:
             self.state[1].append(self.id2sentence[actionID])
         self.state[2].append(self.id2sentence[self.graph.currentNode])
+
+        #if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
+        if self.graph.currentNode in self.answer_positions:
+            done = True
+            reward = 1
 
         return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
