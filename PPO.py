@@ -72,7 +72,7 @@ class ActorNetwork(nn.Module):
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
-        self.num_filters = 10
+        self.num_filters = 1
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
@@ -115,17 +115,17 @@ class ActorNetwork(nn.Module):
         self.maxpool2d_0 = nn.MaxPool2d(
             kernel_size = (50, 1),
             stride = 1)
-        self.maxpool1d_1 = nn.MaxPool1d(
-            kernel_size = 49,
+        self.maxpool2d_1 = nn.MaxPool2d(
+            kernel_size = (49, 1),
             stride = 1)
-        self.maxpool1d_2 = nn.MaxPool1d(
-            kernel_size = 46,
+        self.maxpool2d_2 = nn.MaxPool2d(
+            kernel_size = (46, 1),
             stride = 1)
-        self.maxpool1d_3 = nn.MaxPool1d(
-            kernel_size = 41,
+        self.maxpool2d_3 = nn.MaxPool2d(
+            kernel_size = (41, 1),
             stride = 1)
-        self.maxpool1d_4 = nn.MaxPool1d(
-            kernel_size = 31,
+        self.maxpool2d_4 = nn.MaxPool2d(
+            kernel_size = (31, 1),
             stride = 1)
         self.linear_0 = nn.Linear(
             in_features = 5*self.num_channels*self.num_filters,
@@ -156,20 +156,20 @@ class ActorNetwork(nn.Module):
 
         conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
         conv2d_0_output_relu = self.ReLU(conv2d_0_output)
-        conv2d_1_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_1_output = self.conv2d_1(embedding_output_reshaped)
         conv2d_1_output_relu = self.ReLU(conv2d_1_output)
-        conv2d_2_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_2_output = self.conv2d_2(embedding_output_reshaped)
         conv2d_2_output_relu = self.ReLU(conv2d_2_output)
-        conv2d_3_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_3_output = self.conv2d_3(embedding_output_reshaped)
         conv2d_3_output_relu = self.ReLU(conv2d_3_output)
-        conv2d_4_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_4_output = self.conv2d_4(embedding_output_reshaped)
         conv2d_4_output_relu = self.ReLU(conv2d_4_output)
 
         max_0_output = self.maxpool2d_0(conv2d_0_output_relu)
-        max_1_output = self.maxpool2d_0(conv2d_1_output_relu)
-        max_2_output = self.maxpool2d_0(conv2d_2_output_relu)
-        max_3_output = self.maxpool2d_0(conv2d_3_output_relu)
-        max_4_output = self.maxpool2d_0(conv2d_4_output_relu)
+        max_1_output = self.maxpool2d_1(conv2d_1_output_relu)
+        max_2_output = self.maxpool2d_2(conv2d_2_output_relu)
+        max_3_output = self.maxpool2d_3(conv2d_3_output_relu)
+        max_4_output = self.maxpool2d_4(conv2d_4_output_relu)
 
         linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
             max_3_output, max_4_output), dim = -1)
@@ -216,7 +216,7 @@ class CriticNetwork(nn.Module):
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
-        self.num_filters = 10
+        self.num_filters = 1
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
@@ -258,17 +258,17 @@ class CriticNetwork(nn.Module):
         self.maxpool2d_0 = nn.MaxPool2d(
             kernel_size = (50, 1),
             stride = 1)
-        self.maxpool1d_1 = nn.MaxPool1d(
-            kernel_size = 49,
+        self.maxpool2d_1 = nn.MaxPool2d(
+            kernel_size = (49, 1),
             stride = 1)
-        self.maxpool1d_2 = nn.MaxPool1d(
-            kernel_size = 46,
+        self.maxpool2d_2 = nn.MaxPool2d(
+            kernel_size = (46, 1),
             stride = 1)
-        self.maxpool1d_3 = nn.MaxPool1d(
-            kernel_size = 41,
+        self.maxpool2d_3 = nn.MaxPool2d(
+            kernel_size = (41, 1),
             stride = 1)
-        self.maxpool1d_4 = nn.MaxPool1d(
-            kernel_size = 31,
+        self.maxpool2d_4 = nn.MaxPool2d(
+            kernel_size = (31, 1),
             stride = 1)
         self.linear_0 = nn.Linear(
             in_features = 5*self.num_channels*self.num_filters,
@@ -292,20 +292,20 @@ class CriticNetwork(nn.Module):
 
         conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
         conv2d_0_output_relu = self.ReLU(conv2d_0_output)
-        conv2d_1_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_1_output = self.conv2d_1(embedding_output_reshaped)
         conv2d_1_output_relu = self.ReLU(conv2d_1_output)
-        conv2d_2_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_2_output = self.conv2d_2(embedding_output_reshaped)
         conv2d_2_output_relu = self.ReLU(conv2d_2_output)
-        conv2d_3_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_3_output = self.conv2d_3(embedding_output_reshaped)
         conv2d_3_output_relu = self.ReLU(conv2d_3_output)
-        conv2d_4_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_4_output = self.conv2d_4(embedding_output_reshaped)
         conv2d_4_output_relu = self.ReLU(conv2d_4_output)
 
         max_0_output = self.maxpool2d_0(conv2d_0_output_relu)
-        max_1_output = self.maxpool2d_0(conv2d_1_output_relu)
-        max_2_output = self.maxpool2d_0(conv2d_2_output_relu)
-        max_3_output = self.maxpool2d_0(conv2d_3_output_relu)
-        max_4_output = self.maxpool2d_0(conv2d_4_output_relu)
+        max_1_output = self.maxpool2d_1(conv2d_1_output_relu)
+        max_2_output = self.maxpool2d_2(conv2d_2_output_relu)
+        max_3_output = self.maxpool2d_3(conv2d_3_output_relu)
+        max_4_output = self.maxpool2d_4(conv2d_4_output_relu)
 
         linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
             max_3_output, max_4_output), dim = -1)

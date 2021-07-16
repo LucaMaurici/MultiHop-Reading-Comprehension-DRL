@@ -66,8 +66,8 @@ for i in range(n_samples):
     print(candidates)
 
     if text_to_read != "":
-        #prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
-        prediction = myPredictor.myPredict(text_to_read, question)
+        prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
+        #prediction = myPredictor.myPredict(text_to_read, question)
     else:
         prediction = [("", 1.0)]
     

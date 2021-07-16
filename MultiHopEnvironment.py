@@ -231,8 +231,8 @@ class MultiHopEnvironment:
             self.graph.goTo(self.actions[actionIndex])
         else:
             reward = -1.1
-            #self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
-            return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
+            self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
+            #return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         self.actions = self.graph.getAdjacentNodes()
         self.state[1] = []
