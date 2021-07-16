@@ -11,6 +11,8 @@ from keras import preprocessing
 import numpy as np
 import paths
 
+NUM_ACTIONS = 20
+
 def getSampleById(dataset, id):
     for e in dataset:
         if e['id'] == id:
@@ -78,13 +80,13 @@ def encodeState(state, encoder):
             encodedState.append(encoder.texts_to_sequences([e])[0])
         elif i==1:
             num = 0
-            if len(e) > 8:  # truncate actions if num_actions > 8
-                e = e[0:8]
+            if len(e) > NUM_ACTIONS:  # truncate actions if num_actions > NUM_ACTIONS
+                e = e[0:NUM_ACTIONS]
             for sentence in e:
                 #encodedState.append(encoder.encode(sentence).tolist())
                 encodedState.append(encoder.texts_to_sequences([sentence])[0])
                 num +=1
-            for j in range(8-num):  # pad if num_actions < 8
+            for j in range(NUM_ACTIONS-num):  # pad if num_actions < NUM_ACTIONS
                 encodedState.append(list())
         elif i==2:
             num = 0
@@ -114,10 +116,10 @@ def decode_state(state, encoder):
             #question = encoder.decode(e)
             question = encoder.sequences_to_texts(e)
             decoded_state.append(question)
-        elif i>=1 and i<=8:
+        elif i>=1 and i<=NUM_ACTIONS:
             #actions.append(encoder.decode(e))
             actions.append(encoder.sequences_to_texts(e))
-        elif i>=9 <=38:
+        elif i>=NUM_ACTIONS+1 <=30+NUM_ACTIONS:
             #history.append(encoder.decode(e))
             history.append(encoder.sequences_to_texts(e))
     decoded_state.append(actions)
@@ -222,15 +224,15 @@ class MultiHopEnvironment:
 
 
     def step(self, actionIndex):
-        reward = 0
+        reward = -1
         done = False
 
         if actionIndex < len(self.actions):
             self.graph.goTo(self.actions[actionIndex])
         else:
-            reward = -0.1
-            self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
-            #return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
+            reward = -1.1
+            #self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
+            return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         self.actions = self.graph.getAdjacentNodes()
         self.state[1] = []
@@ -241,7 +243,7 @@ class MultiHopEnvironment:
         #if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
         if self.graph.currentNode in self.answer_positions:
             done = True
-            reward = 1
+            reward = 10
 
         return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 

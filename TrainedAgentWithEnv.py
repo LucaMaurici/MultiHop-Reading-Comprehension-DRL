@@ -82,6 +82,7 @@ for i in range(n_samples):
     print(f"EM Score - Sample: {em_score_sample*100}%")
 
     em_score_tot += em_score_sample
+    print(f"EM Score - partial: {(em_score_tot/(i+1))*100}%")
     print("------------------------------------------------------------------------\n\n")
 
 print(f"EM Score - Final: {(em_score_tot/n_samples)*100}%")

@@ -65,18 +65,20 @@ class ActorNetwork(nn.Module):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_2.2.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_3.1.pth')
         
         #--------------------------------------------------------
-        self.num_actions = 8
+        self.num_actions = 20
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
+        self.num_filters = 10
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
 
         vocab_size = embedding_matrix.shape[0]
+        print(f"vocab_size: {vocab_size}")
         vector_size = embedding_matrix.shape[1]
  
         self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size)
@@ -91,11 +93,11 @@ class ActorNetwork(nn.Module):
         '''
         self.conv2d_0 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (1, 1))
         self.conv2d_1 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.embedding_dim,
@@ -103,11 +105,11 @@ class ActorNetwork(nn.Module):
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (10, 1))
         self.conv2d_4 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (20, 1))
         self.ReLU = nn.ReLU()
         self.maxpool2d_0 = nn.MaxPool2d(
@@ -126,7 +128,7 @@ class ActorNetwork(nn.Module):
             kernel_size = 31,
             stride = 1)
         self.linear_0 = nn.Linear(
-            in_features = 5*self.num_channels,
+            in_features = 5*self.num_channels*self.num_filters,
             #in_features = 195,
             out_features = 64)
         # ReLU
@@ -172,7 +174,8 @@ class ActorNetwork(nn.Module):
         linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
             max_3_output, max_4_output), dim = -1)
 
-        #linear_input_reshaped = linear_input.reshape(input.shape[0], 1, 1, 1950).detach().clone()
+        if self.num_filters != 1:
+            linear_input = linear_input.reshape(input.shape[0], 1, 1, 5*self.num_channels*self.num_filters).detach().clone()
 
         linear_0_output = self.linear_0(linear_input)
         linear_0_output_relu = self.ReLU(linear_0_output)
@@ -204,15 +207,16 @@ class CriticNetwork(nn.Module):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_2.2.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_3.1.pth')
 
         #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
         #--------------------------------------------------------
-        self.num_actions = 8
+        self.num_actions = 20
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
+        self.num_filters = 10
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
@@ -232,11 +236,11 @@ class CriticNetwork(nn.Module):
         '''
         self.conv2d_0 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (1, 1))
         self.conv2d_1 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.embedding_dim,
@@ -244,11 +248,11 @@ class CriticNetwork(nn.Module):
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (10, 1))
         self.conv2d_4 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (20, 1))
         self.ReLU = nn.ReLU()
         self.maxpool2d_0 = nn.MaxPool2d(
@@ -267,7 +271,7 @@ class CriticNetwork(nn.Module):
             kernel_size = 31,
             stride = 1)
         self.linear_0 = nn.Linear(
-            in_features = 5*self.num_channels,
+            in_features = 5*self.num_channels*self.num_filters,
             #in_features = 195,
             out_features = 64)
         # ReLU
@@ -306,6 +310,9 @@ class CriticNetwork(nn.Module):
         linear_input = torch.cat((max_0_output, max_1_output, max_2_output,\
             max_3_output, max_4_output), dim = -1)
 
+        if self.num_filters != 1:
+            linear_input = linear_input.reshape(input.shape[0], 1, 1, 5*self.num_channels*self.num_filters).detach().clone()
+
         linear_0_output = self.linear_0(linear_input)
         linear_0_output_relu = self.ReLU(linear_0_output)
         linear_0_output_relu_dropout = self.dropout(linear_0_output_relu)
@@ -329,8 +336,8 @@ class CriticNetwork(nn.Module):
 class Agent:
     #def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
             #policy_clip=0.2, batch_size=64, n_epochs=10):
-    def __init__(self, gamma=0.95, alpha=0.0003, gae_lambda=0.95,
-            policy_clip=0.2, batch_size=64, n_epochs=10):
+    def __init__(self, gamma=0.7, alpha=0.0003, gae_lambda=0.7,
+            policy_clip=0.4, batch_size=64, n_epochs=10):
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
