@@ -11,7 +11,7 @@ from keras import preprocessing
 import numpy as np
 import paths
 
-NUM_ACTIONS = 20
+NUM_ACTIONS = 31
 
 def getSampleById(dataset, id):
     for e in dataset:

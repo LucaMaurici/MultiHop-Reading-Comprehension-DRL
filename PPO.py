@@ -68,7 +68,7 @@ class ActorNetwork(nn.Module):
         self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_3.1.pth')
         
         #--------------------------------------------------------
-        self.num_actions = 20
+        self.num_actions = 31
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
@@ -212,7 +212,7 @@ class CriticNetwork(nn.Module):
         #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
         #--------------------------------------------------------
-        self.num_actions = 20
+        self.num_actions = 31
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
@@ -355,10 +355,12 @@ class Agent:
                 print(name, param.data)
 
         #self.actor.optimizer = optim.RMSprop(self.actor.parameters())
-        self.actor.optimizer = optim.Adam(self.actor.parameters())
+        self.actor.optimizer = optim.Adam(self.actor.parameters(), lr=alpha)
+        #self.actor.optimizer = optim.SGD(self.actor.parameters(), lr=alpha, momentum=0.9)
         self.critic = CriticNetwork(alpha)
-        self.critic.optimizer = optim.Adam(self.critic.parameters())
+        self.critic.optimizer = optim.Adam(self.critic.parameters(), lr=alpha)
         #self.critic.optimizer = optim.RMSprop(self.critic.parameters())
+        #self.critic.optimizer = optim.SGD(self.critic.parameters(), lr=alpha, momentum=0.9)
         self.memory = PPOMemory(batch_size)
        
     def remember(self, state, action, probs, vals, reward, done):

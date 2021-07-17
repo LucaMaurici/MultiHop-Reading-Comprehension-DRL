@@ -11,10 +11,10 @@ if __name__ == '__main__':
     state = env.reset()
 
     N = 50
-    n_actions = 20
+    n_actions = 31
     batch_size = 300
     n_epochs = 2
-    alpha = 0.003 #0.003
+    alpha = 0.01 #0.003
     n_episodes = 10000
     n_steps = 30
     agent = Agent(batch_size=batch_size, alpha=alpha, n_epochs=n_epochs)
