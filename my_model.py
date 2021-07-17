@@ -8,8 +8,9 @@ import numpy as np
 import wandb
 import pickle
 import random
+from typing import Optional
 
-class PPOMemory:
+class Memory:
     def __init__(self, batch_size):
         self.states = []
         self.outputs = []
@@ -46,12 +47,13 @@ class PPOMemory:
 
 class ActorNetwork(nn.Module):
 
-    def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
+    '''
+    def __init__(self, checkpoint_dir='temp\\ppo'):
         
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_myNet_1.0.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_myModel_1.0.pth')
         
         #--------------------------------------------------------
         self.num_actions = 31
@@ -59,6 +61,65 @@ class ActorNetwork(nn.Module):
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
         self.num_filters = 1
+
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
+
+        vocab_size = embedding_matrix.shape[0]
+        print(f"vocab_size: {vocab_size}")
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size, padding_idx = 50)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
+
+        self.linear_1 = nn.Linear(
+            in_features = self.embedding_dim * self.num_channels * 50,
+            out_features = self.num_actions)
+        #self.softmax = nn.Softmax(3)
+        
+        self.loss_fn = torch.nn.MSELoss(reduce=True)
+
+        if not torch.cuda.is_available(): # NOT sbagliato
+            self.device = torch.device('cuda:0')
+        else:
+            self.device = torch.device('cpu')
+        self.to(self.device)
+
+
+    def forward(self, input, y: Optional[torch.Tensor] = None):
+        #print("\n\n\n\n---FORWARD---\n")
+        embedding_output = self.embedding(input)
+
+        embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim * self.num_channels * 50).detach().clone()
+
+        linear_1_output = self.linear_1(embedding_output_reshaped).squeeze()
+
+
+        result = {'pred': linear_1_output}
+        # compute loss
+        if y is not None:
+            loss = self.loss(linear_1_output, y)
+            result['loss'] = loss
+        
+        return result
+
+    def loss(self, pred, y):
+        return self.loss_fn(pred, y)
+
+    '''
+    def __init__(self, checkpoint_dir='temp\\ppo'):
+        
+        super(ActorNetwork, self).__init__()
+
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_myModel_1.1.pth')
+        
+        #--------------------------------------------------------
+        self.num_actions = 31
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        self.embedding_dim = 50
+        self.num_filters = 5
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
@@ -80,7 +141,7 @@ class ActorNetwork(nn.Module):
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.embedding_dim,
@@ -91,6 +152,7 @@ class ActorNetwork(nn.Module):
             out_channels = self.num_filters,
             kernel_size = (20, 1))
         self.ReLU = nn.ReLU()
+        self.dropoutConv = nn.Dropout(p=0.4, inplace=False)
         self.maxpool2d_0 = nn.MaxPool2d(
             kernel_size = (50, 1),
             stride = 1)
@@ -115,8 +177,9 @@ class ActorNetwork(nn.Module):
         self.linear_1 = nn.Linear(
             in_features = 64,
             out_features = self.num_actions)
-        self.softmax = nn.Softmax(3)
+        #self.softmax = nn.Softmax(3)
         
+        self.loss_fn = torch.nn.MSELoss(reduce=True)
 
         if not torch.cuda.is_available(): # NOT sbagliato
             self.device = torch.device('cuda:0')
@@ -125,7 +188,7 @@ class ActorNetwork(nn.Module):
         self.to(self.device)
 
 
-    def forward(self, input):
+    def forward(self, input, y: Optional[torch.Tensor] = None):
         #print("\n\n\n\n---FORWARD---\n")
         embedding_output = self.embedding(input)
 
@@ -133,14 +196,19 @@ class ActorNetwork(nn.Module):
 
         conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
         conv2d_0_output_relu = self.ReLU(conv2d_0_output)
+        conv2d_0_output_relu = self.dropoutConv(conv2d_0_output_relu)
         conv2d_1_output = self.conv2d_1(embedding_output_reshaped)
         conv2d_1_output_relu = self.ReLU(conv2d_1_output)
+        conv2d_1_output_relu = self.dropoutConv(conv2d_1_output_relu)
         conv2d_2_output = self.conv2d_2(embedding_output_reshaped)
         conv2d_2_output_relu = self.ReLU(conv2d_2_output)
+        conv2d_2_output_relu = self.dropoutConv(conv2d_2_output_relu)
         conv2d_3_output = self.conv2d_3(embedding_output_reshaped)
         conv2d_3_output_relu = self.ReLU(conv2d_3_output)
+        conv2d_3_output_relu = self.dropoutConv(conv2d_3_output_relu)
         conv2d_4_output = self.conv2d_4(embedding_output_reshaped)
         conv2d_4_output_relu = self.ReLU(conv2d_4_output)
+        conv2d_4_output_relu = self.dropoutConv(conv2d_4_output_relu)
 
         max_0_output = self.maxpool2d_0(conv2d_0_output_relu)
         max_1_output = self.maxpool2d_1(conv2d_1_output_relu)
@@ -157,12 +225,21 @@ class ActorNetwork(nn.Module):
         linear_0_output = self.linear_0(linear_input)
         linear_0_output_relu = self.ReLU(linear_0_output)
         linear_0_output_relu_dropout = self.dropout(linear_0_output_relu)
-        linear_1_output = self.linear_1(linear_0_output_relu_dropout)
-
-        #print(f"linear_1_output.shape: {linear_1_output.shape}")
+        linear_1_output = self.linear_1(linear_0_output_relu_dropout).squeeze()
         
-        return linear_1_output
+        result = {'pred': linear_1_output}
+        # compute loss
+        if y is not None:
+            loss = self.loss(linear_1_output, y)
+            result['loss'] = loss
+
+        return result
+
+
+    def loss(self, pred, y):
+        return self.loss_fn(pred, y)
     #------------------------------------------------------------
+    
 
     def save_checkpoint(self):
         try: os.makedirs(self.checkpoint_dir)
@@ -195,7 +272,7 @@ class Agent:
 
         #self.actor.optimizer = optim.RMSprop(self.actor.parameters())
         self.actor.optimizer = optim.Adam(self.actor.parameters())
-        self.memory = PPOMemory(batch_size)
+        self.memory = Memory(batch_size)
        
     def remember(self, state, output, ground_truth):
         self.memory.store_memory(state, output, ground_truth)
@@ -217,10 +294,12 @@ class Agent:
 
         state = torch.tensor(observation).long().to(self.actor.device)
 
-        output = self.actor(state.unsqueeze(0))
-        dist = torch.softmax(output, dim=3)
+        with torch.no_grad():
+            batch_out = self.actor(state.unsqueeze(0))
+        output = batch_out['pred']
+        dist = torch.softmax(output, dim=0)
 
-        randomNumber = random.randint(0, 49)
+        randomNumber = random.randint(0, 99)
         if randomNumber == 0:
             print(f"Action distribution: {dist}")
 
@@ -230,12 +309,12 @@ class Agent:
         probs = torch.squeeze(dist.log_prob(action)).item()
         action = torch.squeeze(action).item()
 
-        return action, output
+        return action, output.tolist()
 
     def learn(self):
         #torch.autograd.set_detect_anomaly(True)
         for _ in range(self.n_epochs):
-            state_arr, output_arr, ground_truth_arr,batches = \
+            state_arr, output_arr, ground_truth_arr, batches = \
                     self.memory.generate_batches()
 
             #print(self.memory.generate_batches())
@@ -243,22 +322,32 @@ class Agent:
 
             for batch in batches:
                 states = torch.tensor(state_arr[batch], dtype=torch.int64).to(self.actor.device)
-                outputs = torch.tensor(output_arr[batch]).to(self.actor.device)
+                
                 ground_truths = torch.tensor(ground_truth_arr[batch]).to(self.actor.device)
-
-                mse_loss = nn.MSELoss()
-                actor_loss = mse_loss(outputs, ground_truths)
-                print(actor_loss)
-                actor_loss = actor_loss.mean()
-
+                ground_truths = ground_truths.float()
+                #outputs.requires_grad = True
                 self.actor.optimizer.zero_grad()
+                
+                #ground_truths.requires_grad = True
+                batch_out = self.actor(states, ground_truths)
+                #outputs = batch_out['pred']
+    
+                #mse_loss = nn.MSELoss(reduce=True)
+                #actor_loss = mse_loss(outputs, ground_truths)
+                actor_loss = batch_out['loss']
+                #actor_loss = actor_loss.mean()
                 actor_loss.backward()
+                '''
+                for name, param in self.actor.named_parameters():
+                    print(name)
+                    print(param.grad)
+                '''
                 self.actor.optimizer.step()
 
         print("\n---LOSSES---")
         print(f"actor: {actor_loss}")
 
-        wandb.log({'Train actor_loss': actor_loss, 'Train critic_loss*2': critic_loss*2, 'Train total_loss': total_loss})
+        wandb.log({'Train actor_loss': actor_loss})
 
         self.memory.clear_memory()
 

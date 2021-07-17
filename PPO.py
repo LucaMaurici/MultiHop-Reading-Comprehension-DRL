@@ -101,7 +101,7 @@ class ActorNetwork(nn.Module):
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.embedding_dim,
@@ -244,7 +244,7 @@ class CriticNetwork(nn.Module):
             kernel_size = (2, 1))
         self.conv2d_2 = nn.Conv2d(
             in_channels = self.embedding_dim,
-            out_channels = 1,
+            out_channels = self.num_filters,
             kernel_size = (5, 1))
         self.conv2d_3 = nn.Conv2d(
             in_channels = self.embedding_dim,

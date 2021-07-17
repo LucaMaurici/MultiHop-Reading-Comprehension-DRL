@@ -69,7 +69,7 @@ class MultiHopEnvironment_MyModel:
         self.train_mode = train_mode
         self.test_index = 0
         if(train_mode):
-            graph_path = paths.graph_path_train
+            graph_path = paths.graph_path_train_marked
             dataset_path = paths.dataset_path_train
         else:
             graph_path = paths.graph_path_dev
@@ -116,7 +116,11 @@ class MultiHopEnvironment_MyModel:
 
         encoded_state = encodeState(self.state, self.encoder)
 
-        return encoded_state, self.state, self.answer, sample['candidates'], self.node2value[self.actions]
+        ground_truth = [0] * NUM_ACTIONS  # list of zeros
+        for i in range(min(len(self.actions), NUM_ACTIONS)):
+            ground_truth[i] = self.node2value[self.actions[i]]
+
+        return encoded_state, self.state, self.answer, sample['candidates'], ground_truth
 
 
     def step(self, actionIndex):
@@ -141,4 +145,8 @@ class MultiHopEnvironment_MyModel:
             done = True
             reward = 10
 
-        return np.array(encodeState(self.state, self.encoder)), reward, done, self.state, self.node2value[self.actions]
+        ground_truth = [0] * NUM_ACTIONS  # list of zeros
+        for i in range(min(len(self.actions), NUM_ACTIONS)):
+            ground_truth[i] = self.node2value[self.actions[i]]
+
+        return np.array(encodeState(self.state, self.encoder)), reward, done, self.state, ground_truth

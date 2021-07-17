@@ -1,0 +1,18 @@
+{
+    "os": "Windows-10-10.0.19041-SP0",
+    "python": "3.9.4",
+    "heartbeatAt": "2021-07-17T17:28:49.467965",
+    "startedAt": "2021-07-17T17:28:46.991273",
+    "docker": null,
+    "gpu": "NVIDIA GeForce GTX 1060 6GB",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "C:\\Users\\lucam\\Documents\\GitHub\\Personale\\MultiHop-Reading-Comprehension-DRL\\my_model_training.py",
+    "codePath": "my_model_training.py",
+    "host": "DESKTOP-9HMRI2T",
+    "username": "lucam",
+    "executable": "C:\\Users\\lucam\\AppData\\Local\\Programs\\Python\\Python39\\python.exe"
+}

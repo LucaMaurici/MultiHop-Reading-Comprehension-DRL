@@ -1,0 +1,1 @@
+{"graph_0": {"_type": "graph-file", "path": "media/graph/graph_0_summary_c1b76503c1a24916eadd.graph.json", "sha256": "c1b76503c1a24916eadda10f8d826b6ee9e195945c92a4de48f5b45f7dfaba37", "size": 3241}, "avg_idx_steps": 20.04, "idx_steps": 25, "_runtime": 7, "_timestamp": 1626540162, "_step": 98, "Train avg_score": -16.214285714285722, "Score": -8.600000000000001}

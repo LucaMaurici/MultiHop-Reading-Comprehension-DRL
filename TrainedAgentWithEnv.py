@@ -2,7 +2,8 @@
 import myPredictor
 #from MultiHopEnvironment import MultiHopEnvironment, decode_state
 from MultiHopEnvironment import MultiHopEnvironment
-from PPO import Agent
+from my_model import Agent
+#from PPO import Agent
 import warnings
 import utils
 import random
@@ -12,7 +13,7 @@ import pickle
 
 env = MultiHopEnvironment(train_mode=False)
 
-graph_path = "CoreferenceGraphsList_train3_uniqueAnswerFiltered.pkl"
+graph_path = "CoreferenceGraphsList_dev3.pkl"
 '''
 with open(paths.graph_path_dev, 'rb') as f:
     graphs_list = pickle.load(f)
@@ -26,7 +27,6 @@ n_steps = 30
 agent = Agent(batch_size = 1, alpha = 0.003, n_epochs = 1)
 agent.load_models()
 
-#n_samples = 9
 em_score_tot = 0
 
 for i in range(n_samples):
@@ -37,7 +37,8 @@ for i in range(n_samples):
 
     #while not done and idx_steps < n_steps:
     while idx_steps < n_steps:
-        action, prob, val = agent.choose_action(observationOld)
+        #action, _, _ = agent.choose_action(observationOld)
+        action, _ = agent.choose_action(observationOld)
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
         observationNew, reward, done, raw_new_state = env.step(action)
