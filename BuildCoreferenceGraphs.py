@@ -4,7 +4,7 @@ import json
 import random
 import paths
 
-N_GRAPHS = 5000
+N_GRAPHS = 30000
 TRAIN_MODE = True
 
 

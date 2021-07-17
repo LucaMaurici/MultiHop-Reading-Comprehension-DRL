@@ -23,7 +23,7 @@ with open(dataset_path, "r") as read_file:
 read_file.close()
 
 #elem = graphs_list[1422]
-elem = graphs_list[0]
+elem = graphs_list[1]
 
 graph = elem["graph"]
 

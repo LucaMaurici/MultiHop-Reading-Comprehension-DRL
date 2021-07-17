@@ -1,4 +1,5 @@
 graph_path_train = "CoreferenceGraphsList_train3_uniqueAnswerFiltered.pkl"
+#graph_path_train = "CoreferenceGraphsList_train3.pkl"
 dataset_path_train = "E:/Datasets/Wikihop/train.json"
 dataset_path_train_squad = "data/datasets/squad2-0_format_data_WikiHop_train_FILTERED.json"
 #dataset_path_train = "C:/Users/corri/Desktop/RLProjects/MultiHop-Reading-Comprehension-DRL/dataset/Wikihop/train.json"

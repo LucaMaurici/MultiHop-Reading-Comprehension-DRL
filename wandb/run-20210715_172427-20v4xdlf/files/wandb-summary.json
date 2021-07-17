@@ -1,0 +1,1 @@
+{"Train avg_score": 0.30000000000000004, "Score": 0.9, "_runtime": 991, "_timestamp": 1626363658, "_step": 1263, "Train actor_loss": 0.0004109442746907952, "Train critic_loss*2": 0.028345299867719293, "Train total_loss": 0.028756244142410087}

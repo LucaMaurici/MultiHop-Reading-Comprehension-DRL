@@ -2,26 +2,20 @@ import numpy as np
 from PPO import Agent
 from my_utils import plot_learning_curve, plot_learning_curve_average
 from MultiHopEnvironment import MultiHopEnvironment
-import dill
 import wandb
 
-LOAD_CHECKPOINT = True
+LOAD_CHECKPOINT = False
 
 if __name__ == '__main__':
     env = MultiHopEnvironment(train_mode=True)
     state = env.reset()
 
-    encoder = None
-    with open('StaticTokenizerEncoder.pkl', 'rb') as f:
-        encoder = dill.load(f)
-    print('Encoder opened')
-
     N = 50
-    n_actions = 8
-    batch_size = 30
-    n_epochs = 5
-    alpha = 0.003 #0.003
-    n_episodes = 5000
+    n_actions = 31
+    batch_size = 300
+    n_epochs = 2
+    alpha = 0.01 #0.003
+    n_episodes = 10000
     n_steps = 30
     agent = Agent(batch_size=batch_size, alpha=alpha, n_epochs=n_epochs)
     if LOAD_CHECKPOINT:
@@ -32,10 +26,13 @@ if __name__ == '__main__':
 
     learn_iters = 0
     avg_score = 0
-    idx_globalSteps = 0
     score_history = list()
+    avg_steps = 0
+    steps_history = list()
+    idx_globalSteps = 0
+    
 
-    run = wandb.init(project='Multi-Hop_Reading_Comprehension_2')
+    run = wandb.init(project='Multi-Hop_Reading_Comprehension_3.1')
     # Log gradients and model parameters
     wandb.watch(agent.actor)
     wandb.watch(agent.critic)
@@ -57,6 +54,10 @@ if __name__ == '__main__':
             agent.remember(observationOld, action, prob, val, reward, done)
             #print("STAMPA 2")
             idx_steps += 1
+            # Log metrics to visualize performance
+        steps_history.append(idx_steps)
+        avg_steps = np.mean(steps_history[-100:])
+        wandb.log({'avg_idx_steps': avg_steps, 'idx_steps': idx_steps})
         if idx_episodes % N == 0:
             #print(f"---LEARN {idx_episodes} ---")
             agent.learn()
@@ -65,7 +66,7 @@ if __name__ == '__main__':
         #print("STAMPA 3")
         observationOld = observationNew
         score_history.append(score)
-        avg_score = np.mean(score_history[-30:])
+        avg_score = np.mean(score_history[-100:])
         #print("STAMPA 4")
         #Per futura parte di ricerca salvare il modello quando l'avg_score è maggiore del best
         #if avg_score > best_score:
@@ -84,8 +85,8 @@ if __name__ == '__main__':
     run.finish()
 
     x = [i+1 for i in range(len(score_history))]
-    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_2.2.jpg")
-    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_ppo_2.2.jpg")
+    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_ppo_3.1.jpg")
+    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_ppo_3.1.jpg")
 
 
 

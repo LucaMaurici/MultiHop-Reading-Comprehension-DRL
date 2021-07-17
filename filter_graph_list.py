@@ -39,7 +39,7 @@ for i, elem in enumerate(graphs_list):
                 file_name = paths.graph_path_dev[0:-4] + "_uniqueAnswerFiltered.pkl"
             continue
     else:
-        if len(elem[answer_positions]) == 0:
+        if len(elem["answer_positions"]) == 0:
             #--- Train ---
             if TRAIN_MODE:
                 #file_name = "CoreferenceGraphsList_train_multipleAnswersFiltered.pkl"

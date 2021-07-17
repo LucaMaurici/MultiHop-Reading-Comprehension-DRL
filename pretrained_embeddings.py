@@ -32,7 +32,7 @@ for item in dataset:
         text.append(item["answer"])
         text.append(item["supports"])
 
-tokenizer = preprocessing.text.Tokenizer(split=" ")
+tokenizer = preprocessing.text.Tokenizer(split=" ", num_words=50000, oov_token='OOV')
 tokenizer.fit_on_texts(text)
  
 text_token=tokenizer.texts_to_sequences(text)
