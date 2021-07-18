@@ -11,6 +11,8 @@ warnings.filterwarnings("ignore")
 import paths
 import pickle
 
+USE_CANDIDATES = False
+
 env = MultiHopEnvironment(train_mode=False)
 
 graph_path = "CoreferenceGraphsList_dev3.pkl"
@@ -67,8 +69,8 @@ for i in range(n_samples):
     print(candidates)
 
     if text_to_read != "":
-        #prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
-        prediction = myPredictor.myPredict(text_to_read, question)
+        if USE_CANDIDATES: prediction = myPredictor.myPredict(text_to_read, question, candidates=candidates)
+        else: prediction = myPredictor.myPredict(text_to_read, question)
     else:
         prediction = [("", 1.0)]
     
