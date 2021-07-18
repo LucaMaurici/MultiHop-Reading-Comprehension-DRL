@@ -9,9 +9,9 @@ LOAD_CHECKPOINT = False
 if __name__ == '__main__':
     env = MultiHopEnvironment_MyModel(train_mode=True)
 
-    N = 50
+    N = 10
     n_actions = 31
-    batch_size = 30
+    batch_size = 1
     n_epochs = 1
     alpha = 0.01 #0.003
     n_episodes = 15000

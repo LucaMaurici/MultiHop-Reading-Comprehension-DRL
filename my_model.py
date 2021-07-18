@@ -107,6 +107,8 @@ class ActorNetwork(nn.Module):
         return self.loss_fn(pred, y)
 
     '''
+
+    
     def __init__(self, checkpoint_dir='temp\\ppo'):
         
         super(ActorNetwork, self).__init__()
@@ -119,7 +121,7 @@ class ActorNetwork(nn.Module):
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
-        self.num_filters = 5
+        self.num_filters = 1000
 
         with open("embedding_matrix.pkl", 'rb') as f:
             embedding_matrix = pickle.load(f)
@@ -181,13 +183,13 @@ class ActorNetwork(nn.Module):
         
         self.loss_fn = torch.nn.MSELoss(reduce=True)
 
-        if not torch.cuda.is_available(): # NOT sbagliato
+        if torch.cuda.is_available(): # NOT sbagliato
             self.device = torch.device('cuda:0')
         else:
             self.device = torch.device('cpu')
         self.to(self.device)
 
-
+    
     def forward(self, input, y: Optional[torch.Tensor] = None):
         #print("\n\n\n\n---FORWARD---\n")
         embedding_output = self.embedding(input)
@@ -230,11 +232,118 @@ class ActorNetwork(nn.Module):
         result = {'pred': linear_1_output}
         # compute loss
         if y is not None:
+            loss = self.loss(linear_1_output, y.squeeze())
+            result['loss'] = loss
+
+        return result
+    
+    '''
+    def __init__(self, checkpoint_dir='temp\\ppo'):
+        
+        super(ActorNetwork, self).__init__()
+
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_myModel_1.1.pth')
+        
+        #--------------------------------------------------------
+        self.num_actions = 31
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        self.embedding_dim = 50
+        self.num_filters = 50
+
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
+
+        vocab_size = embedding_matrix.shape[0]
+        print(f"vocab_size: {vocab_size}")
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size, padding_idx = 50)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
+
+        self.conv2d_0 = nn.Conv2d(
+            in_channels = self.embedding_dim,
+            out_channels = self.num_filters,
+            kernel_size = (1, 1))
+        self.conv2d_1 = nn.Conv2d(
+            in_channels = self.embedding_dim,
+            out_channels = self.num_filters,
+            kernel_size = (2, 1))
+        self.conv2d_2 = nn.Conv2d(
+            in_channels = self.embedding_dim,
+            out_channels = self.num_filters,
+            kernel_size = (5, 1))
+        self.conv2d_3 = nn.Conv2d(
+            in_channels = self.embedding_dim,
+            out_channels = self.num_filters,
+            kernel_size = (10, 1))
+        self.conv2d_4 = nn.Conv2d(
+            in_channels = self.embedding_dim,
+            out_channels = self.num_filters,
+            kernel_size = (20, 1))
+        self.ReLU = nn.ReLU()
+        self.dropoutConv = nn.Dropout(p=0.4, inplace=False)
+        self.linear_0 = nn.Linear(
+            in_features = 217*self.num_channels*self.num_filters,
+            #in_features = 195,
+            out_features = 128)
+        # ReLU
+        self.dropout = nn.Dropout(p=0.5, inplace=False)
+        self.linear_1 = nn.Linear(
+            in_features = 128,
+            out_features = self.num_actions)
+        #self.softmax = nn.Softmax(3)
+        
+        self.loss_fn = torch.nn.MSELoss(reduce=True)
+
+        if not torch.cuda.is_available(): # NOT sbagliato
+            self.device = torch.device('cuda:0')
+        else:
+            self.device = torch.device('cpu')
+        self.to(self.device)
+
+    def forward(self, input, y: Optional[torch.Tensor] = None):
+        #print("\n\n\n\n---FORWARD---\n")
+        embedding_output = self.embedding(input)
+
+        embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim, 50, self.num_channels).detach().clone()
+
+        conv2d_0_output = self.conv2d_0(embedding_output_reshaped)
+        conv2d_0_output_relu = self.ReLU(conv2d_0_output)
+        conv2d_0_output_relu = self.dropoutConv(conv2d_0_output_relu)
+        conv2d_1_output = self.conv2d_1(embedding_output_reshaped)
+        conv2d_1_output_relu = self.ReLU(conv2d_1_output)
+        conv2d_1_output_relu = self.dropoutConv(conv2d_1_output_relu)
+        conv2d_2_output = self.conv2d_2(embedding_output_reshaped)
+        conv2d_2_output_relu = self.ReLU(conv2d_2_output)
+        conv2d_2_output_relu = self.dropoutConv(conv2d_2_output_relu)
+        conv2d_3_output = self.conv2d_3(embedding_output_reshaped)
+        conv2d_3_output_relu = self.ReLU(conv2d_3_output)
+        conv2d_3_output_relu = self.dropoutConv(conv2d_3_output_relu)
+        conv2d_4_output = self.conv2d_4(embedding_output_reshaped)
+        conv2d_4_output_relu = self.ReLU(conv2d_4_output)
+        conv2d_4_output_relu = self.dropoutConv(conv2d_4_output_relu)
+
+        linear_input = torch.cat((conv2d_0_output_relu, conv2d_1_output_relu, conv2d_2_output_relu,\
+            conv2d_3_output_relu, conv2d_4_output_relu), dim = 2)
+
+        #if self.num_filters != 1:
+        linear_input = linear_input.reshape(input.shape[0], 1, 1, 217*self.num_channels*self.num_filters).detach().clone()
+
+        linear_0_output = self.linear_0(linear_input)
+        linear_0_output_relu = self.ReLU(linear_0_output)
+        linear_0_output_relu_dropout = self.dropout(linear_0_output_relu)
+        linear_1_output = self.linear_1(linear_0_output_relu_dropout).squeeze()
+        
+        result = {'pred': linear_1_output}
+        # compute loss
+        if y is not None:
             loss = self.loss(linear_1_output, y)
             result['loss'] = loss
 
         return result
-
+    '''
 
     def loss(self, pred, y):
         return self.loss_fn(pred, y)
@@ -299,7 +408,7 @@ class Agent:
         output = batch_out['pred']
         dist = torch.softmax(output, dim=0)
 
-        randomNumber = random.randint(0, 99)
+        randomNumber = random.randint(0, 39)
         if randomNumber == 0:
             print(f"Action distribution: {dist}")
 
