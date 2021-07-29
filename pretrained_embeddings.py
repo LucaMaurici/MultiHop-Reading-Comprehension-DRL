@@ -22,15 +22,15 @@ glove = pd.read_csv(paths.embedding, sep=" ", quoting=3, header=None, index_col=
 glove_embedding = {key: val.values for key, val in glove.T.items()}
 
 with open("E:/Datasets/Wikihop/train.json", "r") as read_file:
-        dataset = json.load(read_file)
+    dataset = json.load(read_file)
 
 #text=["The cat sat on mat","we can play with model"]
 
 text = list()
 for item in dataset:
-        text.append(item["query"])
-        text.append(item["answer"])
-        text.append(item["supports"])
+    text.append(item["query"])
+    text.append(item["answer"])
+    text.append(item["supports"])
 
 tokenizer = preprocessing.text.Tokenizer(split=" ", num_words=50000, oov_token='OOV')
 tokenizer.fit_on_texts(text)

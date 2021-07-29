@@ -60,15 +60,16 @@ class PPOMemory:
 class ActorNetwork(nn.Module):
 
     #def __init__(self, n_action, input_dims, alpha, checkpoint_dir='temp/ppo'):
+    
     def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
-        
+    
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_3.1.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_4.0.pth')
         
         #--------------------------------------------------------
-        self.num_actions = 31
+        self.num_actions = 9
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
@@ -185,6 +186,67 @@ class ActorNetwork(nn.Module):
         #print(f"linear_1_output.shape: {linear_1_output.shape}")
         
         return self.softmax(linear_1_output)
+    '''
+
+    def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
+        super(ActorNetwork, self).__init__()
+        
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'actor_torch_ppo_dense_1.0.pth')
+        
+        #--------------------------------------------------------
+        self.num_actions = 9
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        self.embedding_dim = 50
+        self.num_filters = 128
+
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
+
+        vocab_size = embedding_matrix.shape[0]
+        print(f"vocab_size: {vocab_size}")
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size, padding_idx = 50)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
+
+        self.linear_0 = nn.Linear(
+            in_features = 50*self.embedding_dim*self.num_channels,
+            out_features = 64)
+        self.tanh = nn.Tanh()
+        self.dropout = nn.Dropout(p=0.5, inplace=False)
+        self.linear_1 = nn.Linear(
+            in_features = 64,
+            out_features = self.num_actions)
+        self.softmax = nn.Softmax(0)
+        
+        self.loss_fn = torch.nn.MSELoss(reduce=True)
+
+        if torch.cuda.is_available(): # NOT sbagliato
+            self.device = torch.device('cuda:0')
+        else:
+            self.device = torch.device('cpu')
+        self.to(self.device)
+
+    
+    def forward(self, input, ):
+        #print("\n\n\n\n---FORWARD---\n")
+        embedding_output = self.embedding(input)
+
+        #embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim, 50, self.num_channels).detach().clone()
+        embedding_output_reshaped = torch.flatten(embedding_output, start_dim=1, end_dim=-1)
+
+        #linear_input = linear_input.reshape(input.shape[0], 1, 1, 5*self.num_channels*self.num_filters).detach().clone()
+
+        linear_0_output = self.linear_0(embedding_output_reshaped)
+        linear_0_output_tanh = self.tanh(linear_0_output)
+        linear_0_output_tanh_dropout = self.dropout(linear_0_output_tanh)
+        linear_1_output = self.linear_1(linear_0_output_tanh_dropout).squeeze()
+        result = self.softmax(linear_1_output)
+
+        return result
+    '''
     #------------------------------------------------------------
 
     def save_checkpoint(self):
@@ -203,16 +265,17 @@ class ActorNetwork(nn.Module):
 
 class CriticNetwork(nn.Module):
     #def __init__(self, input_dims, alpha, checkpoint_dir='temp/ppo'):
+    
     def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
         super(CriticNetwork, self).__init__()
 
         self.checkpoint_dir = checkpoint_dir
-        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_3.1.pth')
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_4.0.pth')
 
         #self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
         #--------------------------------------------------------
-        self.num_actions = 31
+        self.num_actions = 9
         self.num_accepted = 30
         self.num_channels = self.num_actions+self.num_accepted+1
         self.embedding_dim = 50
@@ -227,13 +290,6 @@ class CriticNetwork(nn.Module):
         self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size)
         self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
 
-        '''
-        self.embedding = nn.Embedding(
-            num_embeddings = 201585,
-            embedding_dim = self.embedding_dim) 
-            #padding_idx = 50, 
-            #max_norm = 1)
-        '''
         self.conv2d_0 = nn.Conv2d(
             in_channels = self.embedding_dim,
             out_channels = self.num_filters,
@@ -319,6 +375,66 @@ class CriticNetwork(nn.Module):
         linear_1_output = self.linear_1(linear_0_output_relu_dropout)
         
         return linear_1_output
+    '''
+
+    def __init__(self, alpha, checkpoint_dir='temp\\ppo'):
+        super(CriticNetwork, self).__init__()
+
+        self.checkpoint_dir = checkpoint_dir
+        self.checkpoint_file = os.path.join(checkpoint_dir, 'critic_torch_ppo_dense_1.0.pth')
+        
+        #--------------------------------------------------------
+        self.num_actions = 9
+        self.num_accepted = 30
+        self.num_channels = self.num_actions+self.num_accepted+1
+        self.embedding_dim = 50
+        self.num_filters = 128
+
+        with open("embedding_matrix.pkl", 'rb') as f:
+            embedding_matrix = pickle.load(f)
+
+        vocab_size = embedding_matrix.shape[0]
+        print(f"vocab_size: {vocab_size}")
+        vector_size = embedding_matrix.shape[1]
+ 
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vector_size, padding_idx = 50)
+        self.embedding.weight = nn.Parameter(torch.tensor(embedding_matrix, dtype=torch.float32))
+
+        self.linear_0 = nn.Linear(
+            in_features = 50*self.embedding_dim*self.num_channels,
+            out_features = 64)
+        self.tanh = nn.Tanh()
+        self.dropout = nn.Dropout(p=0.5, inplace=False)
+        self.linear_1 = nn.Linear(
+            in_features = 64,
+            out_features = 1)
+        #self.softmax = nn.Softmax(3)
+        
+        self.loss_fn = torch.nn.MSELoss(reduce=True)
+
+        if torch.cuda.is_available(): # NOT sbagliato
+            self.device = torch.device('cuda:0')
+        else:
+            self.device = torch.device('cpu')
+        self.to(self.device)
+
+    
+    def forward(self, input, ):
+        #print("\n\n\n\n---FORWARD---\n")
+        embedding_output = self.embedding(input)
+
+        #embedding_output_reshaped = embedding_output.reshape(input.shape[0], self.embedding_dim, 50, self.num_channels).detach().clone()
+        embedding_output_reshaped = torch.flatten(embedding_output, start_dim=1, end_dim=-1)
+
+        #linear_input = linear_input.reshape(input.shape[0], 1, 1, 5*self.num_channels*self.num_filters).detach().clone()
+
+        linear_0_output = self.linear_0(embedding_output_reshaped)
+        linear_0_output_tanh = self.tanh(linear_0_output)
+        linear_0_output_tanh_dropout = self.dropout(linear_0_output_tanh)
+        linear_1_output = self.linear_1(linear_0_output_tanh_dropout).squeeze()
+
+        return linear_1_output
+    '''
     #------------------------------------------------------------
 
     def save_checkpoint(self):
@@ -336,8 +452,8 @@ class CriticNetwork(nn.Module):
 class Agent:
     #def __init__(self, n_actions, input_dims, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
             #policy_clip=0.2, batch_size=64, n_epochs=10):
-    def __init__(self, gamma=0.7, alpha=0.0003, gae_lambda=0.7,
-            policy_clip=0.4, batch_size=64, n_epochs=10):
+    def __init__(self, gamma=0.95, alpha=0.0003, gae_lambda=0.95,
+            policy_clip=0.2, batch_size=64, n_epochs=10):
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
@@ -355,10 +471,10 @@ class Agent:
                 print(name, param.data)
 
         #self.actor.optimizer = optim.RMSprop(self.actor.parameters())
-        self.actor.optimizer = optim.Adam(self.actor.parameters(), lr=alpha)
+        self.actor.optimizer = optim.Adam(self.actor.parameters())
         #self.actor.optimizer = optim.SGD(self.actor.parameters(), lr=alpha, momentum=0.9)
         self.critic = CriticNetwork(alpha)
-        self.critic.optimizer = optim.Adam(self.critic.parameters(), lr=alpha)
+        self.critic.optimizer = optim.Adam(self.critic.parameters())
         #self.critic.optimizer = optim.RMSprop(self.critic.parameters())
         #self.critic.optimizer = optim.SGD(self.critic.parameters(), lr=alpha, momentum=0.9)
         self.memory = PPOMemory(batch_size)

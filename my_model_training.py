@@ -9,12 +9,12 @@ LOAD_CHECKPOINT = False
 if __name__ == '__main__':
     env = MultiHopEnvironment_MyModel(train_mode=True)
 
-    N = 10
-    n_actions = 31
-    batch_size = 1
+    N = 50
+    n_actions = 9
+    batch_size = 600
     n_epochs = 1
     alpha = 0.01 #0.003
-    n_episodes = 15000
+    n_episodes = 10000
     n_steps = 30
     agent = Agent(batch_size=batch_size, alpha=alpha, n_epochs=n_epochs)
     if LOAD_CHECKPOINT:
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     idx_globalSteps = 0
     
 
-    run = wandb.init(project='Multi-Hop_Reading_Comprehension_myModel_1.0')
+    run = wandb.init(project='Multi-Hop_Reading_Comprehension_myModel_5.0')
     # Log gradients and model parameters
     wandb.watch(agent.actor)
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             idx_steps += 1
             # Log metrics to visualize performance
         steps_history.append(idx_steps)
-        avg_steps = np.mean(steps_history[-100:])
+        avg_steps = np.mean(steps_history[-500:])
         wandb.log({'avg_idx_steps': avg_steps, 'idx_steps': idx_steps})
         if idx_episodes % N == 0:
             #print(f"---LEARN {idx_episodes} ---")
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         #print("STAMPA 3")
         observationOld = observationNew
         score_history.append(score)
-        avg_score = np.mean(score_history[-100:])
+        avg_score = np.mean(score_history[-500:])
         #print("STAMPA 4")
         #Per futura parte di ricerca salvare il modello quando l'avg_score è maggiore del best
         #if avg_score > best_score:
@@ -82,8 +82,8 @@ if __name__ == '__main__':
     run.finish()
 
     x = [i+1 for i in range(len(score_history))]
-    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_myModel_1.0.jpg")
-    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_myModel_1.0.jpg")
+    plot_learning_curve_average(x, score_history, "temp\\learning_curve_average_torch_myModel_5.0.jpg")
+    plot_learning_curve(x, score_history, "temp\\learning_curve_torch_myModel_5.0.jpg")
 
 
 

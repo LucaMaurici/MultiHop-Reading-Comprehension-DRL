@@ -40,7 +40,7 @@ for i, graphs_list_item in enumerate(graphs_list):
 
     G = nx.DiGraph()
     G.add_edges_from(graph.getEdges())
-    shortest_paths = nx.single_source_shortest_path(G, source='q', cutoff=6)
+    shortest_paths = nx.single_source_shortest_path(G, source='q', cutoff=14)
     #print(len(shortest_paths))
     sequence = list()
     for value in shortest_paths.values():

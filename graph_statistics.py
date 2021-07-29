@@ -3,8 +3,8 @@ import CoreferenceGraph as cg
 import math
 import matplotlib.pyplot as plt
 
-#graph_path = "CoreferenceGraphsList_dev3_uniqueAnswerFiltered.pkl"
-graph_path = "CoreferenceGraphsList_train3_uniqueAnswerFiltered.pkl"
+graph_path = "CoreferenceGraphsList_dev_uniqueAnswerFiltered.pkl"
+#graph_path = "CoreferenceGraphsList_train3_uniqueAnswerFiltered.pkl"
 
 try:
     with open(graph_path, 'rb') as f:
@@ -26,7 +26,7 @@ total_number_of_nodes = 0
 num_walks_more_than_10_hops = 0
 num_walks_more_than_10_hops_with_unreachable_answers = 0
 
-MEAN_DEGREE = 5.38507214834757
+MEAN_DEGREE = 5.385
 total_squared_deviation_degree = 0
 degree2occ = {}
 

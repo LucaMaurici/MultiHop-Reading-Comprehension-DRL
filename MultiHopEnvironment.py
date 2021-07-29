@@ -11,7 +11,7 @@ from keras import preprocessing
 import numpy as np
 import paths
 
-NUM_ACTIONS = 31
+NUM_ACTIONS = 9
 
 def getSampleById(dataset, id):
     for e in dataset:
@@ -224,14 +224,17 @@ class MultiHopEnvironment:
 
 
     def step(self, actionIndex):
-        reward = -1
+        reward = 0
         done = False
 
         if actionIndex < len(self.actions):
             self.graph.goTo(self.actions[actionIndex])
         else:
-            reward = -1.1
+            #if len(self.actions) > 0:
+                #print(len(self.actions))
             self.graph.goTo(self.actions[random.randint(0, len(self.actions)-1)])
+            #else:
+            reward = -0.1
             #return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
         self.actions = self.graph.getAdjacentNodes()
@@ -243,7 +246,7 @@ class MultiHopEnvironment:
         #if cg.shareWords(self.answer, self.id2sentence[self.graph.currentNode]):
         if self.graph.currentNode in self.answer_positions:
             done = True
-            reward = 10
+            reward = 1
 
         return np.array(encodeState(self.state, self.encoder)), reward, done, self.state
 
