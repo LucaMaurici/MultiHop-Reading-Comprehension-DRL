@@ -1,9 +1,8 @@
 #from MnemonicReader import myPredictor
 import myPredictor
-#from MultiHopEnvironment import MultiHopEnvironment, decode_state
 from MultiHopEnvironment import MultiHopEnvironment
-from my_model import Agent
-#from PPO import Agent
+from my_model import Agent  # myModel
+#from PPO import Agent  # PPO
 import warnings
 import utils
 import random
@@ -11,7 +10,7 @@ warnings.filterwarnings("ignore")
 import paths
 import pickle
 
-USE_CANDIDATES = False
+USE_CANDIDATES = True
 
 env = MultiHopEnvironment(train_mode=False)
 
@@ -39,17 +38,22 @@ for i in range(n_samples):
 
     #while not done and idx_steps < n_steps:
     while idx_steps < n_steps:
-        #action, _, _ = agent.choose_action(observationOld)
-        action, _ = agent.choose_action(observationOld)
+
+        #action, _, _ = agent.choose_action(observationOld)  # PPO
+        action, _ = agent.choose_action(observationOld)  # myPolicy
+
         #print(f"---STEP: {idx_steps} ---")
         #print("STAMPA 1")
+
         observationNew, reward, done, raw_new_state = env.step(action)
-        #observationNew, reward, done, raw_new_state = env.step(random.randint(0, 31))
+
+        # Random walk
         '''
         reward = -0.1
         while(reward == -0.1):
-            observationNew, reward, done, raw_new_state = env.step(random.randint(0, 34))
+            observationNew, reward, done, raw_new_state = env.step(random.randint(36, 37))
         '''
+
         idx_steps += 1
         score += reward
 

@@ -1,0 +1,1 @@
+{"Train actor_loss": 0.005397086252955327, "Train critic_loss*2": 0.006479410851284541, "Train total_loss": 0.011876497104239868, "_runtime": 11, "_timestamp": 1626103518, "_step": 1, "Train avg_score": 0.8}

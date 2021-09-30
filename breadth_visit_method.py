@@ -12,7 +12,7 @@ import utils
 
 import myPredictor
 
-USE_CANDIDATES = True
+USE_CANDIDATES = False
 
 graph_path = "CoreferenceGraphsList_dev3.pkl"
 

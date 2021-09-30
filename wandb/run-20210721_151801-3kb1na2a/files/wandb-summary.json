@@ -1,0 +1,1 @@
+{"avg_idx_steps": 19.42, "idx_steps": 30, "_runtime": 19, "_timestamp": 1626873500, "_step": 200, "Train avg_score": 0.5151515151515151, "Score": 0, "Train actor_loss": 0.019749315880459306, "Train critic_loss*2": 0.3059062881305565, "Train total_loss": 0.3256556040110158}

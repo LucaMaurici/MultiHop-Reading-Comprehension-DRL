@@ -1,0 +1,1 @@
+{"avg_idx_steps": 18.0, "idx_steps": 8, "_runtime": 5, "_timestamp": 1626617640, "_step": 18, "Train avg_score": -14.533333333333339, "Score": -9.100000000000001, "graph_0": {"_type": "graph-file", "path": "media/graph/graph_0_summary_a3d3e576aff5ab281d78.graph.json", "sha256": "a3d3e576aff5ab281d783c4c76b4a150952f0ad79128ba70aa0615f39fa4a74c", "size": 3669}}
