@@ -23,4 +23,4 @@ the research and experiments carried out along with the respective results.
 
 ### ...
 
-### To know more, read the file called "Project paper.pdf".
+### To know more, read the file called "Project report.pdf".
