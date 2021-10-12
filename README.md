@@ -1,40 +1,26 @@
 # MultiHop Reading Comprehension-DRL
 
-Paper Datasets: https://www.aclweb.org/anthology/Q18-1021.pdf
-Wikihop in SQuAD format: https://github.com/alontalmor/MultiQA
+Reference paper: https://arxiv.org/pdf/1905.09438.pdf
 
-FATTO: Controllare se, quando si costruisce lo stato, il numero di azioni venga effettivamente costretto a non essere > 8
-minore di 8 già funziona, nel senso che viene aggiunto il è padding in maniera funzionante.
+## 1 Introduction
+This project was centred around the topic of Reading Comprehension (RC) in the context of Question
+Answering (QA); or rather accurately identifying the relevant text from several context documents to
+answer a given question. More specifically, this work concerned the reference paper “Multi-hop Reading
+Comprehension via Deep Reinforcement Learning based Document Traversal” by Long et al. (Long,
 
-TODO: 	- Droppare dal dataset di train i sample per cui non è chiaro dove sia la risposta
-		- Cambiare architettura della rete
-		- Usare embeddings preallenati
-		- Preprocessing
-		- Cambiare entity linking nella costruzione del grafo
-		- Capire se si possano fornire i candidates al MnemonicReader
-		- Controllare e pensare a contemplare il caso in cui non si riesca a collegare la domanda a nessuna frase
-		- Cambiare il DONE nello step dell'environment
-		- Spostare la creazione dei link fra documenti consecutivi alla fine di tutto o comunque dopo la coreference resolution
+2019). From said paper, it may be deduced that RC is a sequential process, particularly in the case of multi-
+hop. Therefore, to reach an answer, a series of independent stages are required. Firstly, starting from a
 
-		OBIETTIVO: 
-		Arrivare a 33% di accuracy con random walk (tenendo il resto uguale)
+collection of documents, graphs of sentences are constructed. The second stage involves an extractor
+which, through the graph traversal, identifies the appropriate section of knowledge among the various
+documents. Finally, the output from the extractor is computed by a reader. More specifically it is the
+Reinforced Mnemonic Reader, which had been shown to perform well compared to previous attentive
+readers, as seen by Hu et al. (Hu, 2018).
+As an alternative to PPO optimisation, two other possible novel approaches are proposed: Shortest Path
+Policy Optimisation (ShPaPO) and Breath Visit Method.
+The implementation is described below in terms of said three stages, the report then moves on to outline
+the research and experiments carried out along with the respective results.
 
-		- Stimare media e varianza del grado del grafo
-		- Stimare quanto è lungo il cammino ottimo medio fino alla risposta (3,44)
-		- Stimare quante volte non si raggiunge in maniera ottima un nodo risposta con più di 10 hop (1,52%)
+### ...
 
-		Se va tutto bene allora il problema è più probabile che sia nel mnemonic reader "use it as the base reader implementation"
-		Altrimenti aggiustare prima il grafo e poi pensare al resto.
-
-		- Provare i candidates con RandomWalk
-		- Il mnemonic reader potrebbe avere sia il problema che loro hanno usato quel paper come base implementation e sia il fatto che potrebbero averlo riallenato (forse non capisce le domande nel formato strano di wikihop)
-
-		ALTRO POSSIBILE OBIETTIVO:
-		Non usare neanche il mnemonic reader usando come metrica quella in tabella 2, in cui misuriamo quante volte trovaimo una frase con la risposta usando o il grafo con RandomWalk o il grafo con la policy
-
-
-		RICERCA:
-		- Esplorare il grafo dando reward 1 per tutte le frasi che sono ritenute delle possibili contenitrici di risposte. Per una data frase dare reward 1 una sola volta e reward negativa (es: -0.2) per ogni volta che si ripassa due volte sulla stessa frase (forse anche per ogni generica frase). In questo modo cerchiamo di raccogliere tutte le frasi in cui presumiamo possa essere contenuta la risposta e non ci fermiamo alla prima che troviamo (che ptorebbe non contenerla), potremmo addirittura pensare di fermarci (done = True) solo quando siamo passati in tutte le frasi che potrebbero contenere la risposta.
-		- Valutare l'idea di allungare gli step consentiti prima di fermarsi (>30)
-		- Dare in input alla rete anche gli id delle frasi al fine di estrarre possibili pattern (ad esempio ci sembra che le risposte capitino verso l'inizio dei documenti (in realtà dovremmo controllare quanto sono lunghi in media))
-		- Prendere tutti i cammini o n cammini di lunghezza l dalla domanda
+### To know more, read the file called "Project paper.pdf".
