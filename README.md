@@ -23,4 +23,5 @@ the research and experiments carried out along with the respective results.
 
 ### ...
 
-### To know more, read this file: https://github.com/LucaMaurici/MultiHop-Reading-Comprehension-DRL/blob/main/Project%20report.pdf.
+### To know more, read this file:
+https://github.com/LucaMaurici/MultiHop-Reading-Comprehension-DRL/blob/main/Project%20report.pdf
